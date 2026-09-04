@@ -22,6 +22,9 @@ for (const p of [
   'scripts/session-state.mjs',
   'commands/zone-targeted.md',
   'skills/zone-targeted/SKILL.md',
+  'commands/zone-serving-check.md',
+  'skills/zone-serving-check/SKILL.md',
+  'skills/zone-serving-check/reference.md',
 ]) check(existsSync(join(pluginRoot, p)), `missing: ${p}`);
 
 if (errors.length) {
