@@ -1,6 +1,6 @@
 {
   "name": "lincx-inventory",
-  "description": "Inventory queries over Lincx config — /zone-targeted: every ad group directly targeted to a zone and whether it's fully live; /zone-serving-check: what actually serves in a zone for a given geo and why an offer is absent.",
+  "description": "Inventory queries over Lincx config — starting with /zone-targeted: every ad group directly targeted to a zone and whether it's fully live.",
   "version": "0.1.0",
   "author": {
     "name": "Lincx"

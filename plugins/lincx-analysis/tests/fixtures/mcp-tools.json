@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-27",
-  "source": "mcp/src/tools/*.ts",
+  "generatedAt": "2026-09-04",
+  "source": "mcp/src/tools/*.{js,ts}",
   "tools": [
     "auth_login",
     "auth_logout",
@@ -26,7 +26,9 @@
     "get_template_versions",
     "get_zone",
     "get_zone_ads",
+    "get_zone_candidates",
     "get_zone_eligible_ad_groups",
+    "get_zone_exposure",
     "get_zone_report",
     "get_zone_targeting_inventory",
     "list_ad_groups",
