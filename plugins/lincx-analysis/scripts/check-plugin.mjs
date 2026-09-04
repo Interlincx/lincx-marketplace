@@ -22,17 +22,21 @@ if (existsSync(manifestPath)) {
 // expected skills (auto-discovered by Claude Code, but we sanity-check presence)
 for (const skill of [
   'skills/lincx-zone-tiering/SKILL.md',
+  'skills/zone-exposure/SKILL.md',
 ]) check(existsSync(join(pluginRoot, skill)), `missing skill: ${skill}`);
 
 // expected references — the skill loads these by relative path at runtime
 for (const ref of [
   'skills/lincx-zone-tiering/references/tiering-rules.md',
   'skills/lincx-zone-tiering/references/output-template.md',
+  'skills/zone-exposure/references/inference-rules.md',
+  'skills/zone-exposure/references/output-template.md',
 ]) check(existsSync(join(pluginRoot, ref)), `missing reference: ${ref}`);
 
 // expected commands
 for (const cmd of [
   'commands/zone-tiering.md',
+  'commands/zone-exposure.md',
 ]) check(existsSync(join(pluginRoot, cmd)), `missing command: ${cmd}`);
 
 if (errors.length) {

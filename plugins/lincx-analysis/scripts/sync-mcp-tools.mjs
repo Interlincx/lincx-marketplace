@@ -15,11 +15,11 @@ const defaultMcpRoot = resolve(pluginRoot, '../../../mcp');
 const mcpRoot = process.argv[2] ? resolve(process.argv[2]) : defaultMcpRoot;
 const toolsDir = join(mcpRoot, 'src', 'tools');
 
-const REGISTER_RE = /server\.registerTool\(\s*"([a-zA-Z0-9_]+)"/g;
+const REGISTER_RE = /server\.registerTool\(\s*["']([a-zA-Z0-9_]+)["']/g;
 
 const tools = new Set();
 for (const entry of readdirSync(toolsDir)) {
-  if (!entry.endsWith('.ts')) continue;
+  if (!/\.[jt]s$/.test(entry)) continue;
   const src = readFileSync(join(toolsDir, entry), 'utf8');
   for (const m of src.matchAll(REGISTER_RE)) tools.add(m[1]);
 }
@@ -27,7 +27,7 @@ for (const entry of readdirSync(toolsDir)) {
 const sorted = Array.from(tools).sort();
 const out = {
   generatedAt: new Date().toISOString().slice(0, 10),
-  source: 'mcp/src/tools/*.ts',
+  source: 'mcp/src/tools/*.{js,ts}',
   tools: sorted,
 };
 

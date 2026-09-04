@@ -14,17 +14,17 @@
     {
       "name": "lincx-reports",
       "source": "./plugins/lincx-reports",
-      "description": "Manager-friendly reports — campaign performance, revenue, creative anomalies — over the Lincx MCP"
+      "description": "Manager-friendly reports \u2014 campaign performance, revenue, creative anomalies \u2014 over the Lincx MCP"
     },
     {
       "name": "lincx-inventory",
       "source": "./plugins/lincx-inventory",
-      "description": "Inventory queries over Lincx config — zone targeting rollups, live/off filtering, geo-aware zone serving checks"
+      "description": "Inventory queries over Lincx config \u2014 zone targeting rollups, live/off filtering"
     },
     {
       "name": "lincx-analysis",
       "source": "./plugins/lincx-analysis",
-      "description": "Zone tier analysis — the platform computes the tiers, Claude writes the narrative"
+      "description": "Zone analysis \u2014 tier analysis and exposure diagnostics; the platform computes the numbers, Claude writes the narrative"
     }
   ]
 }
