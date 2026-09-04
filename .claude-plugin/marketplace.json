@@ -19,7 +19,7 @@
     {
       "name": "lincx-inventory",
       "source": "./plugins/lincx-inventory",
-      "description": "Inventory queries over Lincx config — zone targeting rollups, live/off filtering"
+      "description": "Inventory queries over Lincx config — zone targeting rollups, live/off filtering, geo-aware zone serving checks"
     },
     {
       "name": "lincx-analysis",
