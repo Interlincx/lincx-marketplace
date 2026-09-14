@@ -25,7 +25,7 @@ Explain the headline. Cite the one row or driver that matters most. If nothing n
 
 ## 4. Footer (one line, fixed format)
 
-`Source: dimension set "<name>" (<id>) · range <YYYY-MM-DD> → <YYYY-MM-DD> · resolution <day|hour> · network <active_network>`
+`Source: dimension set "<name>" (<id>) · range <YYYY-MM-DD> → <YYYY-MM-DD> · grouped by <groupBy or "total"> · days <UTC|IANA zone> · network <network_id>`
 
 The footer makes every result auditable — a manager can hand the answer to an analyst and they can re-run it.
 
