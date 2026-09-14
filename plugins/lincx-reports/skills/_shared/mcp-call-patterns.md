@@ -1,22 +1,27 @@
 # MCP call patterns — what works, what doesn't
 
-## `report_query` accepts no structured filters
+## `report_query` parameters
 
-The tool takes `dimensionSetId`, `startDate`, `endDate`, `resolution: "day"|"hour"`, `dimensions: string[]`, and `testMode`. There is no `filters` parameter. To "filter to campaign X":
+Run the dimension check in `_shared/dimension-discovery.md` first — every `groupBy` / `filter` key, and `hour` when `timezone` is set, must be a dimension of the chosen set.
 
-1. Pick a dimension set whose `dimensions` include `campaign_id`.
-2. Call `report_query` with `dimensions: ["date", "campaign_id"]`.
-3. Filter the returned rows client-side to the campaign ID(s) you resolved.
+The tool takes exactly these (the schema is strict — anything else is rejected):
 
-Never pass `testMode: true` in production reports. Never guess a filter parameter that doesn't exist.
+- `network_id` — required, the network the user picked (from `network_list`). Every business tool takes it; there is no active network.
+- `dimensionSetId` — the checked set.
+- `startDate`, `endDate` — required, `YYYY-MM-DD`.
+- `groupBy: string[]` — dimensions to roll up by, e.g. `["zone"]`, `["date", "advertiser"]`. Omit for one grand total. Sums are computed server-side.
+- `filter: { <dimension>: <value> }` — scope to one entity, e.g. `{ campaign: "Spring Promo" }`. Matches the value the dimension emits (usually the name), case-insensitively. Use this instead of filtering rows yourself.
+- `timezone` — IANA name (`America/Denver`). Buckets days in local time. Requires `hour` in the set. Omit for UTC.
+- `raw: true` — unaggregated rows; large, only when per-row detail is needed.
+- `testMode` — never `true` in production reports.
 
-## Resolution is `day` or `hour` only
+There is no `resolution` or `dimensions` parameter. Granularity comes from `groupBy`: add `date` for daily rows, `hour` for hourly. There is no `week` or `month` — query with `date` and aggregate in your response.
 
-There is no `week` or `month`. Multi-week reports come from daily rows you sum yourself. If the user asks for "monthly", you query daily and aggregate in your response.
+The response carries `total`, `groups` (sorted by loads/revenue), `rowsScanned`, and `groupsTruncated` when groups were capped to fit.
 
 ## Pagination on `list_*` tools
 
-All `list_*` tools take `{ limit, offset }`, max `limit: 100`, default 20. They do **not** accept a search/name filter. To find an entity by name:
+All `list_*` tools take `{ network_id, limit, offset }`, max `limit: 100`, default 20. They do **not** accept a search/name filter. To find an entity by name:
 
 1. Page through with `limit: 100`.
 2. Filter by case-insensitive substring on the entity's `name` field client-side.
@@ -28,22 +33,24 @@ For very large networks, consider asking the user for the entity ID directly, or
 
 - `"Error: Not authenticated. Use 'auth_login' first."` — surface, ask the user to run `auth_login`. Do not retry.
 - `"Error: Unauthorized. Use 'auth_logout' then 'auth_login' to re-authenticate."` — same: surface and stop.
-- `"Error: Forbidden — you don't have access to this resource on the active network."` — check active network with `network_list` and offer `network_switch`.
+- `"Error: Forbidden — you don't have access to this resource on the network."` — check the `network_id` against `network_list` and ask which network to use.
 - `"Error: Resource not found. Double-check the ID."` — verify the ID; do not invent.
 - `"Error: Rate limit hit. Wait a moment then retry."` — wait, retry once.
 - `"Error: Request timed out."` — retry once with the same params.
+- `"…Dimension names are case-sensitive: use 'adGroup' not 'adgroup'."` — check this first: the note is appended to the `missing [...]` message below, so a miscased name looks like a missing dimension. The report has that dimension under a different spelling. Re-run with the exact string from the catalog; do not send it to Reports Center.
+- `"Error: dimension set <id> is missing [<dims>]…"` (with no case-sensitivity note) or `"…returned daily rows with no hour…"` — the chosen report can't answer this. Go back to Step 3 of `_shared/dimension-discovery.md` and suggest reports that carry those dimensions. Do not retry, and do not drop `timezone` or the breakdown without asking.
 
 ## Truncation detection
 
-Responses include `"[Truncated. Use pagination parameters to see more.]"` (or with a total count) when long. If you see this, do not synthesize numbers from the cut-off body. Tell the user the response was truncated and suggest narrowing the range or breakdown.
+Responses include `"[Truncated. Use pagination parameters to see more.]"` (or with a total count) when long, and `report_query` sets `groupsTruncated` when it kept only the top groups. If you see either, do not synthesize numbers from the cut-off body. Tell the user the response was truncated and suggest narrowing the range, adding a `filter`, or a coarser `groupBy`.
 
 ## Tool-call budget per turn
 
 Aim for ≤ 5 tool calls per report:
 
 - 1 entity `list_*` (or zero if the user gave an ID)
-- 1 `list_dimension_sets`
-- 1 `get_dimension_set`
+- 1 `list_dimension_sets` with `fields: ["dimensions"]`
+- 0–1 `get_dimension_set` (only if the catalog didn't include dimensions)
 - 1–2 `report_query` (two only for anomaly mode)
 
 Calling `list_dimension_sets` twice in one turn is a bug — cache the catalog mentally.

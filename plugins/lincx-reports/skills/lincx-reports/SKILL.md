@@ -25,11 +25,12 @@ If the user did not give a date range, ask before doing anything. Do not start t
 
 If any tool returns `"Error: Not authenticated"`, stop and ask the user to run `auth_login` (you can mention it; do not run it for them — it opens a browser flow that requires their credentials).
 
-If the active network is wrong or missing, surface `network_list` results and ask which network to switch to with `network_switch`.
+Every MCP business tool takes a `network_id` — there is no active network. If the user didn't name one, surface `network_list` results and ask which network to use, then pass that `network_id` on every call.
 
 ## What you never do
 
 - Default a date range.
 - Pick a network for the user.
-- Combine data across networks (each MCP call is scoped to the active network).
+- Combine data across networks (each MCP call is scoped to one `network_id`).
 - Speculate on causes when the data does not show them.
+- Run `report_query` before the dimension check in `_shared/dimension-discovery.md` passes, or answer from a report that lacks a dimension the question needs.
