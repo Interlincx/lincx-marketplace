@@ -6,6 +6,10 @@ Ask "how should zone `abc123` be tiered for June?" and get a tier structure, per
 creative tables, risk flags, and a prioritized action list — with every number computed
 by the platform and every sentence written by Claude.
 
+The MCP is read-only, so the analysis itself is started from the Lincx UI. This plugin
+finds the run that already covers the zone and window you asked about, and writes the
+report on it.
+
 ## The split
 
 The Lincx platform already runs a deterministic tiering engine: aggregation,
@@ -13,9 +17,9 @@ reliability-weighted CPM, waterfall rank collapse, percentile tier banding. It a
 a server-side Gemini pass that writes narrative on top — but that pass can't change a
 single number, because the engine overwrites every metric the model emits.
 
-So this plugin skips it. `create_analysis` defaults to `noLLM: true`, the engine result
-comes back with the narrative fields empty, and Claude fills them in using the grounding
-rules in `skills/lincx-zone-tiering/references/tiering-rules.md`.
+So this plugin skips it. An analysis queued with `noLLM` comes back with the narrative
+fields empty, and Claude fills them in using the grounding rules in
+`skills/lincx-zone-tiering/references/tiering-rules.md`.
 
 What that buys:
 
@@ -44,37 +48,40 @@ The date range is never defaulted.
 ## Install
 
 ```
-/plugin marketplace add zakasalaheddine/lincx-marketplace
+/plugin marketplace add Interlincx/lincx-marketplace
 /plugin install lincx-analysis@lincx-marketplace
 /reload-plugins
 ```
 
 ## Requirements
 
-- The **Lincx MCP** connected to your session, at a version that ships
-  `create_analysis` / `get_analysis` / `list_analyses`. Run `/mcp` to confirm.
+- The **Lincx MCP** connected to your session, at a version that ships `list_analyses`
+  / `get_analysis`. Run `/mcp` to confirm. There is no tool for starting an analysis —
+  the one that did was removed upstream on 2026-09-04 as the only non-read-only
+  business tool, so analyses are started from the Lincx UI.
 - **Analysis access.** These endpoints are gated by an email allowlist upstream
   (`server/analysis-allowlist.js` in lincx-core), separate from network permissions. A
   403 means you're not on it — ask the platform team, not your network admin.
 
 ## How it runs
 
-1. `create_analysis` queues a job and returns immediately with an id.
-2. The skill polls `get_analysis` — bounded at 10 attempts, then it hands you the id
-   rather than looping.
-3. On `succeeded`, it parses the payload and writes the report per
-   `references/output-template.md`.
+1. `list_analyses` finds succeeded runs on the network, newest first; the skill matches
+   on the row's `analysisType` and its `request.zoneId` / `dateStart` / `dateEnd`.
+2. `get_analysis` reads that run's payload.
+3. It parses the payload and writes the report per `references/output-template.md`.
 
-Analyses are asynchronous because the underlying ClickHouse query and pipeline take
-real time. A wide zone over a long window is the slow case; if polling times out, the
-job is still running and `get_analysis` on that id will have it later.
+If nothing matches, the skill says so instead of reporting on a neighbouring window.
+Analyses are asynchronous — the underlying ClickHouse query and pipeline take real
+time — so a run started in the UI a moment ago may still be `queued`/`running`, and
+those documents carry no results at all.
 
 ## Development
 
 ```
-npm test                 # lint + unit tests
-npm run sync-mcp-tools   # regenerate tests/fixtures/mcp-tools.json from ../../../mcp
+npm test                                  # lint + unit tests + the repo-wide tool check
+node ../../scripts/sync-mcp-tools.mjs     # regenerate the root mcp-tools.json
 ```
 
-`tests/tool-references.test.mjs` fails the build if a skill references an MCP tool that
-doesn't exist in the snapshot — which is what keeps the docs honest when the MCP moves.
+`npm test` fails the build if a skill references an MCP tool that isn't in
+`mcp-tools.json` at the repo root — one snapshot shared by every plugin, which is what
+keeps the docs honest when the MCP moves.

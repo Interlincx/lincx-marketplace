@@ -26,15 +26,15 @@ More plugins will land here — this is the single place to install every Lincx-
 
 ## Install — for end users (published version)
 
-Once this repo is published, install the marketplace and a plugin from any Claude Code session:
+Install the marketplace and a plugin from any Claude Code session:
 
 ```
-/plugin marketplace add zakasalaheddine/lincx-marketplace
+/plugin marketplace add Interlincx/lincx-marketplace
 /plugin install templates-editor-plugin@lincx-marketplace
 /reload-plugins
 ```
 
-Replace `zakasalaheddine/lincx-marketplace` with the actual GitHub slug once published. Same commands work in the CLI, the desktop apps, the IDE extensions, and the web app — anywhere Claude Code runs.
+Same commands work in the CLI, the desktop apps, the IDE extensions, and the web app — anywhere Claude Code runs.
 
 **Updating:** to pull the latest version of an installed plugin:
 
@@ -89,7 +89,7 @@ Changes to the linked dir are live after each `/reload-plugins`. Useful when you
 If you want to keep a local clone but share it across machines:
 
 ```bash
-git clone https://github.com/zakasalaheddine/lincx-marketplace.git ~/code/lincx-marketplace
+git clone https://github.com/Interlincx/lincx-marketplace.git ~/code/lincx-marketplace
 ```
 
 Then in Claude Code:
@@ -153,19 +153,28 @@ npm test
 
 This runs the Node unit tests, a shell fixture for the PostToolUse hook, and a structural lint of the plugin layout. No install needed — stdlib only.
 
+Across all plugins, one check catches skill docs that still name an MCP tool the Lincx MCP no longer registers:
+
+```
+node scripts/check-mcp-tool-refs.mjs
+```
+
+It reads `mcp-tools.json` at the root — the single snapshot of what lincx-mcp registers, shared by every plugin. Refresh it after an MCP release:
+
+```
+node scripts/sync-mcp-tools.mjs              # over `gh api`, no checkout needed
+node scripts/sync-mcp-tools.mjs ../lincx-mcp # or from a local clone
+```
+
+`knownUnresolved` in that file records references that are deliberately left alone, each with the reason.
+
 Plugin architecture docs, the full design spec, and the implementation plan live under `docs/superpowers/`. The `todo.md` at the root tracks deferred items (most notable: upgrading the local preview renderer to full Mustache).
 
 ---
 
 ## Publishing
 
-When ready to publish the marketplace for others to install:
-
-```bash
-gh repo create lincx-marketplace --public --source=. --push
-```
-
-Replace `--public` with `--private` if you want to restrict access (users will need repo access to install). Once pushed, the `/plugin marketplace add <owner>/lincx-marketplace` flow in the "for end users" section works from any Claude Code session.
+The marketplace is published at [Interlincx/lincx-marketplace](https://github.com/Interlincx/lincx-marketplace). It is public, so the `/plugin marketplace add Interlincx/lincx-marketplace` flow in the "for end users" section works from any Claude Code session.
 
 ---
 

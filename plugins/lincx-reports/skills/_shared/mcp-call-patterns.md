@@ -28,7 +28,7 @@ For very large networks, consider asking the user for the entity ID directly, or
 
 - `"Error: Not authenticated. Use 'auth_login' first."` — surface, ask the user to run `auth_login`. Do not retry.
 - `"Error: Unauthorized. Use 'auth_logout' then 'auth_login' to re-authenticate."` — same: surface and stop.
-- `"Error: Forbidden — you don't have access to this resource on the active network."` — check active network with `network_list` and offer `network_switch`.
+- `"Error: Forbidden — you don't have access to this resource on the network."` — check the `network_id` against `network_list` and ask which network to use.
 - `"Error: Resource not found. Double-check the ID."` — verify the ID; do not invent.
 - `"Error: Rate limit hit. Wait a moment then retry."` — wait, retry once.
 - `"Error: Request timed out."` — retry once with the same params.

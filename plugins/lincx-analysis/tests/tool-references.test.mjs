@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const pluginRoot = resolve(here, '..');
 const skillsRoot = join(pluginRoot, 'skills');
-const snapshotPath = join(pluginRoot, 'tests', 'fixtures', 'mcp-tools.json');
+const snapshotPath = resolve(pluginRoot, '../..', 'mcp-tools.json');
 
 const snapshot = JSON.parse(readFileSync(snapshotPath, 'utf8'));
 const knownTools = new Set(snapshot.tools);

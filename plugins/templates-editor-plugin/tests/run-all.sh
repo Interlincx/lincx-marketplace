@@ -11,4 +11,7 @@ bash tests/hook.test.sh
 echo "== structural lint =="
 node scripts/check-plugin.mjs
 
+echo "== mcp tool references (repo-wide) =="
+node ../../scripts/check-mcp-tool-refs.mjs
+
 echo "all tests passed"
