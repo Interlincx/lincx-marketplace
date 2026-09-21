@@ -16,11 +16,16 @@ nonsense.
 
 ## Flow
 
-1. **Resolve inputs.** `zoneId` (6 lowercase alphanumerics), `dateStart`, `dateEnd`
-   (`YYYY-MM-DD`), and optionally a timezone CODE (`UTC`, `EST`, `PDT` — not an IANA
-   name; `UTC` is the default). **If the user did not give a date range, ask. Never
-   default one.** A tier recommendation is only as good as its window, and a window you
-   invented is a recommendation the user cannot audit.
+**The MCP is read-only — you cannot start an analysis.** It has no tool that queues
+one; analyses are created in the Lincx UI. Your job is to find the run that already
+answers the question and write the report on top of it. If none exists, say so and
+stop — never present a report built from a different zone or a different window.
+
+1. **Resolve inputs.** `network_id` (ask, or `network_list` and ask — every tool here
+   takes it), `zoneId` (6 lowercase alphanumerics), `dateStart`, `dateEnd`
+   (`YYYY-MM-DD`). **If the user did not give a date range, ask. Never default one.** A
+   tier recommendation is only as good as its window, and a window you invented is a
+   recommendation the user cannot audit.
 
    Two weeks or more is where the engine's coverage gate (`daysAtRank >= 7`) and
    partial-window rule (`datasetSpan >= 14`) start marking results `CONFIRMED` rather
@@ -33,28 +38,37 @@ nonsense.
    | "which creatives are my best/worst", "how should I tier this zone", "tier recommendation" | `offerTiering` |
    | "which offer should sit at rank 1/2/3", "how should I order the slots", "rank allocation" | `rankedOfferOptimization` |
 
-   If genuinely ambiguous, ask — do not run both.
+   If genuinely ambiguous, ask — do not report on both.
 
-3. **Queue it:**
+3. **Find the run:**
 
-   `create_analysis({ zoneId, dateStart, dateEnd, analysisType, timezone })`
+   `list_analyses({ network_id, status: "succeeded" })`
 
-   Leave `noLLM` alone. It defaults to `true`, which is what makes this skill the
-   analyst instead of a second one on the server.
+   Newest first, summary fields only. Match on the row's `analysisType` plus its
+   `request.zoneId` / `request.dateStart` / `request.dateEnd`. Page with
+   `cursor: <_id of the last row>` while `next_cursor` is present, and stop paging once
+   rows predate the window the user asked about.
 
-   Note the returned `_id`. If the response carries a `note` about a network mismatch,
-   surface it — the job exists but `list_analyses` will not show it.
+   - **Exact match** → use it.
+   - **Same zone and type, different window** → do not silently substitute it. Name its
+     actual range and ask whether to report on that instead.
+   - **Nothing for this zone** → tell the user there is no analysis to report on and
+     that one has to be started from the Lincx UI. Do not offer to run it yourself.
 
-4. **Poll, bounded.** Call `get_analysis({ id })` until `status` is `succeeded` or
-   `failed`. **Poll at most 10 times.** If it is still `queued`/`running` after that,
-   stop and hand the user the `analysisId` with "still running — ask me to check
-   `get_analysis` on this id in a minute." Do not loop indefinitely, and do not report
-   on a `queued`/`running` document: it has no `input` and no `output` at all.
+4. **Read it.** `get_analysis({ network_id, id })`. A `succeeded` row from step 3 is
+   already terminal, so no polling. If you were handed an id directly and it comes back
+   `queued`/`running`, stop — that document has no `input` and no `output` at all. Hand
+   the id back and offer to check again in a minute rather than looping.
 
 5. **Parse.** The tool returns a one-line header, a blank line, then compact JSON.
    Parse everything after the first blank line.
 
 6. **Write the report** per `references/output-template.md`.
+
+   On a `noLLM` run (`request.noLLM: true`) the engine's narrative fields come back
+   empty by design — that is the case this skill is built for. On a run with `noLLM`
+   false, the server's own narrative is already there; report the numbers and say the
+   narrative is the server's, rather than writing a second one over it.
 
 ## What the payload contains
 
@@ -97,9 +111,9 @@ slots you fill. Writing them is your job in this skill.
   suggest a shorter date range for the input breakdown.
 - On `"Error: Not authenticated…"` surface it and ask the user to run `auth_login`; do
   not retry, do not run it for them.
-- On a **403 / Forbidden** from `create_analysis`: analysis access is gated by a
-  separate email allowlist upstream, independent of network permissions. Say that
-  plainly rather than sending the user to check their network.
+- On a **403 / Forbidden** from `list_analyses` / `get_analysis`: analysis access is
+  gated by a separate email allowlist upstream, independent of network permissions. Say
+  that plainly rather than sending the user to check their network.
 - On `status: "failed"`, report `error.name` and `error.message` verbatim. Common ones:
   `NotFoundError` (no event data for that zone/range), `ValidationError` (data quality
   gate), `TokenLimitExceededError` (only on non-`noLLM` runs).

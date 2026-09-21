@@ -8,4 +8,7 @@ node scripts/check-plugin.mjs
 echo "=== unit (node --test tests/*.test.mjs) ==="
 node --test tests/*.test.mjs
 
+echo "== mcp tool references (repo-wide) =="
+node ../../scripts/check-mcp-tool-refs.mjs
+
 echo "✔ all green"
