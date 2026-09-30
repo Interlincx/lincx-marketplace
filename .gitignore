@@ -13,3 +13,6 @@ node_modules/
 !.claude-plugin/**
 !plugins/*/.claude-plugin/
 !plugins/*/.claude-plugin/**
+
+# portable skill bundles — rebuild with: node scripts/build-portable-skills.mjs
+dist/

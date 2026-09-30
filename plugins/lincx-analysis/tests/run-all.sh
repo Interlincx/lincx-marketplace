@@ -11,4 +11,7 @@ node --test tests/*.test.mjs
 echo "== mcp tool references (repo-wide) =="
 node ../../scripts/check-mcp-tool-refs.mjs
 
+echo "== portable skills (repo-wide) =="
+node ../../scripts/build-portable-skills.mjs "$(mktemp -d)"
+
 echo "✔ all green"

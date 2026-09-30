@@ -47,10 +47,7 @@
     "report_query"
   ],
   "knownUnresolved": {
-    "mcp__claude_ai_Lincx__get_creative_asset_group": "templates-editor-plugin targets a 'Lincx' MCP deployment, not the live 'lincx-mcp' one. Tool exists upstream but under a different server prefix. See issue #8.",
-    "mcp__claude_ai_Lincx__get_zone_ads": "Same deployment mismatch as the other mcp__claude_ai_Lincx__ refs. See issue #8.",
-    "mcp__claude_ai_Lincx__list_creative_asset_groups": "Same deployment mismatch as the other mcp__claude_ai_Lincx__ refs. See issue #8.",
-    "mcp__claude_ai_Lincx__get_template_preview_bundle": "Not registered by lincx-mcp at all — planned in docs/superpowers/plans/2026-05-08-deterministic-template-preview.md, never shipped there. See issue #8.",
-    "mcp__claude_ai_Lincx__save_template_version": "Not registered by lincx-mcp; a write tool, against the server's read-only convention. The plugin already guards on its availability. See issue #8."
+    "get_template_preview_bundle": "Not registered by lincx-mcp at all — planned in docs/superpowers/plans/2026-05-08-deterministic-template-preview.md, never shipped there. See issue #8.",
+    "save_template_version": "Not registered by lincx-mcp; a write tool, against the server's read-only convention. The plugin already guards on its availability. See issue #8."
   }
 }

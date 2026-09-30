@@ -22,7 +22,7 @@ Before running any report, add the Lincx MCP server to your Claude config so the
 {
   "mcpServers": {
     "lincx": {
-      "url": "https://lincx-mcp.fly.dev/mcp"
+      "url": "https://mcp.lincx.com/mcp"
     }
   }
 }

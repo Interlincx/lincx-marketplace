@@ -7,7 +7,7 @@ A deterministic checklist an AI (or human) must follow when generating a new Lin
 ## 0. Before writing anything
 
 - [ ] Confirm the **template type** (one of): `listicle`, `sticky-offer-bar`, `product-card`, `ads-box`, `best-overall-product`, `featured-vs-all`, `simple-cta`, or hybrid. If unclear, ask the user.
-- [ ] **Load the CAG (`creativeAssetGroup`) for this template** via `mcp__claude_ai_Lincx__get_creative_asset_group(id=…)` and cache the schema. The CAG fields are the **only** fields available — use them verbatim, use nothing else. Field names vary per template; do **not** copy field names from other templates or from the examples under `patterns/`. See §6.
+- [ ] **Load the CAG (`creativeAssetGroup`) for this template** via `get_creative_asset_group(id=…)` and cache the schema. The CAG fields are the **only** fields available — use them verbatim, use nothing else. Field names vary per template; do **not** copy field names from other templates or from the examples under `patterns/`. See §6.
 - [ ] Confirm the **client/network** (e.g. Affiliati, Centerfield, Refinance.com) so the visual language matches.
 - [ ] Confirm **media type**: image-only, video-only, or both (affects lazy-load JS).
 - [ ] Confirm whether the template needs a **footer with legal disclaimer** (listicles: yes; sticky bars/cards: usually no).
@@ -95,7 +95,7 @@ This is Lincx's way of hiding empty Mustache fields at render time.
 
 Consequences:
 
-- [ ] Before writing or editing, call `mcp__claude_ai_Lincx__get_creative_asset_group(id=…)` for this template's CAG and use **only** the fields it returns.
+- [ ] Before writing or editing, call `get_creative_asset_group(id=…)` for this template's CAG and use **only** the fields it returns.
 - [ ] Do **not** guess field names from prior templates, from the `patterns/example-*` directory, or from the illustrative list below. A field that exists in one template does NOT imply it exists in another.
 - [ ] If the brief mentions data the CAG doesn't expose, stop and coordinate a CAG update before writing the template. Don't invent fields.
 - [ ] Preserve whatever casing and spelling the CAG uses — including historical typos (e.g. `listical_headline` in one legacy CAG). Never "correct" a field name locally.

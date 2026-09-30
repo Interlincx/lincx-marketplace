@@ -55,7 +55,7 @@ function scanLine(line, at) {
 
   for (const [, qualified, tool] of line.matchAll(QUALIFIED_RE)) {
     scanned++;
-    if (allowed.has(qualified)) continue;
+    if (allowed.has(qualified) || allowed.has(tool)) continue;
     if (!known.has(tool)) offenders.push(`${at}: ${qualified} — not a registered tool`);
   }
 
@@ -64,6 +64,7 @@ function scanLine(line, at) {
     if (ident.endsWith('_') || !ident.includes('_')) continue;
     if (NOT_TOOLS.has(ident) || !TOOL_PREFIXES.some((p) => ident.startsWith(p))) continue;
     scanned++;
+    if (allowed.has(ident)) continue;
     if (!known.has(ident)) offenders.push(`${at}: \`${ident}\` — not a registered tool`);
   }
 
@@ -86,7 +87,7 @@ function selfTest() {
   // The live server prefix has a hyphen in it, which a [A-Za-z0-9_] server segment can't cross.
   eq(hits('`mcp__claude_ai_lincx-mcp__get_widget`'), 1, 'qualified ref, hyphenated server');
   eq(hits('`mcp__claude_ai_lincx-mcp__get_zone`'), 0, 'qualified ref to a live tool');
-  eq(hits('`mcp__claude_ai_Lincx__save_template_version`'), 0, 'allowlisted ref');
+  eq(hits('`save_template_version`'), 0, 'allowlisted bare ref');
   eq(hits('all `list_` tools take `network_id` over `start_date`'), 0, 'wildcard and field names');
 }
 
