@@ -94,7 +94,7 @@ Every template is bound to its own `creativeAssetGroup` (CAG). The CAG is the **
 - Abbreviate (`cta` instead of `cta_text`). Don't pluralize / depluralize.
 - "Correct" a legacy typo in the CAG (e.g. `listical_headline`) — if the CAG uses it, use it verbatim.
 
-✅ **Do:** Load the CAG for the template you're working on via `mcp__claude_ai_Lincx__get_creative_asset_group(id=…)`; use exactly the field names it returns, and nothing else. If the brief needs a field that isn't in the CAG, stop and coordinate a CAG update before writing the template. See `CHECKLIST.md` §6.
+✅ **Do:** Load the CAG for the template you're working on via `get_creative_asset_group(id=…)`; use exactly the field names it returns, and nothing else. If the brief needs a field that isn't in the CAG, stop and coordinate a CAG update before writing the template. See `CHECKLIST.md` §6.
 
 ---
 

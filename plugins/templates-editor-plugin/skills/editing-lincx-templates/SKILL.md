@@ -11,7 +11,7 @@ You help users author and adjust Lincx ad creative templates (HTML + CSS) bound 
 
 **Two sources of truth, split by role:**
 - **The references under `${CLAUDE_PLUGIN_ROOT}/references/`** are the authority for **structure, conventions, class names, Mustache forms, data attributes, JS helpers, and required legal/tracking markup**.
-- **The CAG (`creativeAssetGroup`) for the specific template you're working on** is the authority for **which fields exist, their types, and their spelling**. The CAG is loaded per session via `mcp__claude_ai_Lincx__get_creative_asset_group(id=…)` in flows A/B below, and cached in session state as `cagSchema`.
+- **The CAG (`creativeAssetGroup`) for the specific template you're working on** is the authority for **which fields exist, their types, and their spelling**. The CAG is loaded per session via `get_creative_asset_group(id=…)` in flows A/B below, and cached in session state as `cagSchema`.
 
 Never confuse the two. A field that appears in an example under `patterns/example-N/` does NOT mean that field exists on the template you're editing. Every CAG is its own contract.
 
@@ -71,7 +71,7 @@ Use `${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs` (`readSessionState`, `writ
 
 1. `auth_status` — if unauthenticated, tell the user to run `auth_login` and stop.
 2. Ask the user where to place the files (prompt for `htmlPath` and `cssPath` under their current project). Do not default silently.
-3. `mcp__claude_ai_Lincx__get_template_preview_bundle(templateId=<id>)`. Surface any error inline; do not mutate session state on error.
+3. `get_template_preview_bundle(templateId=<id>)`. Surface any error inline; do not mutate session state on error.
 4. Persist the returned bundle to `./.lincx-session.bundle.json` (caller-local, gitignored).
 5. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/resolve-zone-and-ads.mjs ./.lincx-session.bundle.json <entryId> <htmlPath> <cssPath> <projectRoot>`. The script writes html/css to disk and prints a session-state patch on stdout.
 6. Merge the patch into `.lincx-session.json` via `upsertEntry`. Set `dirty:false`, `previewOpened:false`. Delete `./.lincx-session.bundle.json`.
@@ -94,7 +94,7 @@ Use `${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs` (`readSessionState`, `writ
 
 1. Read `.lincx-session.json`.
 2. For each entry with `dirty:true`:
-   - Determine if `mcp__claude_ai_Lincx__save_template_version` is available in this session's tools.
+   - Determine if `save_template_version` is available in this session's tools.
    - If yes and `templateId != null`: import `saveAsync` from `${CLAUDE_PLUGIN_ROOT}/scripts/save-seam.mjs`; wrap the MCP call in a `mcpWrite` function you pass in:
      ```
      async function mcpWrite({ templateId, html, css }) {
@@ -121,10 +121,10 @@ Use `${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs` (`readSessionState`, `writ
 ### Flow F — Refresh schema (from `/lincx-template-refresh-schema`)
 
 1. For each entry whose `mockAdsSource.kind` is `zone-resolved` or `synthesized-fallback`:
-   - `mcp__claude_ai_Lincx__get_template_preview_bundle(templateId=entry.templateId)`.
+   - `get_template_preview_bundle(templateId=entry.templateId)`.
    - Run the resolver script as in Flow A step 5; merge the resulting patch.
    - Print any `warnings`.
-2. For entries whose `kind` is `zone` (manual override) or `synthesized` (Flow B), only re-fetch the CAG via `mcp__claude_ai_Lincx__get_creative_asset_group(id=entry.creativeAssetGroupId)` and replace `cagSchema`. Leave `mockAds` and `mockAdsSource` unchanged.
+2. For entries whose `kind` is `zone` (manual override) or `synthesized` (Flow B), only re-fetch the CAG via `get_creative_asset_group(id=entry.creativeAssetGroupId)` and replace `cagSchema`. Leave `mockAds` and `mockAdsSource` unchanged.
 3. Dispatch `preview-render.mjs` for each affected entry.
 
 ## Never do

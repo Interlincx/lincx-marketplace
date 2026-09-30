@@ -104,6 +104,88 @@ Pull updates with `git pull` in the clone, then `/reload-plugins`.
 
 ---
 
+## Install on other agents (ChatGPT, Codex, Grok, Gemini, Copilot)
+
+The skills follow the open [Agent Skills](https://agentskills.io) format: a folder with a `SKILL.md`. Other agents can load them too. Build self-contained copies first:
+
+```
+node scripts/build-portable-skills.mjs   # writes dist/skills/<skill-name>/
+```
+
+Each folder carries every file it references: `_shared/` for the reports, and `references/` plus `scripts/` for the template editor. It also names MCP tools without a host prefix. The build fails if any skill would break outside Claude Code.
+
+Every agent needs two things: the skill folders, and the **Lincx MCP** at `https://mcp.lincx.com/mcp` (OAuth sign-in on first use). Without the MCP the skills have no tools to call. The steps below install everything; to install fewer, copy only the folders you want. Run them from the root of this repo after the build.
+
+### Codex CLI
+
+```bash
+mkdir -p ~/.agents/skills && cp -R dist/skills/* ~/.agents/skills/   # or <project>/.agents/skills/
+codex mcp add lincx --url https://mcp.lincx.com/mcp
+codex mcp login lincx                                                 # browser OAuth
+```
+
+Restart `codex` and run `/mcp` to confirm `lincx` is connected.
+
+### Gemini CLI
+
+```bash
+mkdir -p ~/.gemini/skills && cp -R dist/skills/* ~/.gemini/skills/   # or <project>/.gemini/skills/
+gemini mcp add --transport http lincx https://mcp.lincx.com/mcp
+```
+
+Start `gemini` and run `/mcp auth lincx` to sign in.
+
+### GitHub Copilot (VS Code agent mode / Copilot CLI)
+
+```bash
+mkdir -p .github/skills && cp -R dist/skills/* .github/skills/      # or ~/.copilot/skills/
+```
+
+Add the server to `.vscode/mcp.json`, then press **Start** above it in VS Code and sign in:
+
+```json
+{
+  "servers": {
+    "lincx": { "type": "http", "url": "https://mcp.lincx.com/mcp" }
+  }
+}
+```
+
+### Grok Build
+
+```bash
+mkdir -p ~/.agents/skills && cp -R dist/skills/* ~/.agents/skills/   # or <project>/.agents/skills/
+```
+
+Add `https://mcp.lincx.com/mcp` as an HTTP server with `grok mcp add` (`grok mcp add --help` shows the flags). Run `grok inspect` to confirm the skills and the server were found.
+
+### ChatGPT (web / desktop)
+
+1. **Settings → Apps → Advanced settings**, turn on **Developer mode**.
+2. **Settings → Apps → Create connector**. Name: `Lincx`. MCP Server URL: `https://mcp.lincx.com/mcp`. Authentication: **OAuth**. Tick the trust box and save, then sign in.
+3. Create a **Project**. Paste the skill's `SKILL.md` into the project instructions, and upload the files it cites (`_shared/*.md`, `references/*.md`) as project files.
+4. In a chat inside that project, enable the Lincx connector and ask your question.
+
+### OpenAI API
+
+```bash
+cd dist/skills && zip -r lincx-reports.zip lincx-reports    # one zip per skill
+```
+
+Upload each zip with `POST /v1/skills`, and pass the MCP as a tool: `{"type": "mcp", "server_label": "lincx", "server_url": "https://mcp.lincx.com/mcp"}`.
+
+### Grok chat, or any other chat app
+
+Paste `SKILL.md` and the files it cites into the project or custom instructions. This only works if the app lets you add `https://mcp.lincx.com/mcp` as a custom MCP connector. Without it, the model has no Lincx tools.
+
+Limits outside Claude Code:
+- Slash commands (`/zone-targeted`, `/lincx-template-*`) and hooks aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
+- `lincx-reports` is a router over three sibling skills, so install all four together.
+- `editing-lincx-templates` runs `node scripts/…` for its preview loop. It needs an agent with shell access (Codex, Gemini CLI, Grok Build, Copilot agent mode). Chat-only UIs can still write templates but can't preview them. There's no hook, so re-run the preview after each edit.
+- `editing-lincx-templates` also calls `get_template_preview_bundle`, which lincx-mcp doesn't register yet (#8). That gap applies in Claude Code too.
+
+---
+
 ## Using `templates-editor-plugin`
 
 Once installed, you'll have these slash commands available in any Claude Code session where the Lincx MCP is connected:
@@ -167,6 +249,8 @@ node scripts/sync-mcp-tools.mjs ../lincx-mcp # or from a local clone
 ```
 
 `knownUnresolved` in that file records references that are deliberately left alone, each with the reason.
+
+To check that every skill still works outside Claude Code, run `node scripts/build-portable-skills.mjs`. It exits non-zero on a spec violation or on a reference that points outside the skill.
 
 Plugin architecture docs, the full design spec, and the implementation plan live under `docs/superpowers/`. The `todo.md` at the root tracks deferred items (most notable: upgrading the local preview renderer to full Mustache).
 

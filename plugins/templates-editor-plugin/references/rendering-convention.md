@@ -66,7 +66,7 @@ We don't use Mustache partials (`{{> partial }}`) or lambda sections. Every temp
 There is **no universal field contract** across Lincx templates. Every template is bound to its own `creativeAssetGroup` (CAG), and the CAG defines exactly which fields exist for that template. Two templates of the same visual type routinely have different field names and types.
 
 Implications for substitution:
-- Load the CAG via `mcp__claude_ai_Lincx__get_creative_asset_group(id=…)` and use only the fields it returns.
+- Load the CAG via `get_creative_asset_group(id=…)` and use only the fields it returns.
 - Whichever fields the CAG defines as HTML-bearing — use `{{{ triple-brace }}}` for those. The HTML-bearing fields vary per CAG.
 - Don't port field names between templates. If a CAG uses a legacy typo (e.g. `listical_headline` in one older CAG), keep the typo for *that* template. Don't carry the typo into a different CAG's template.
 
