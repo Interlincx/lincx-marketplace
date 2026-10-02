@@ -13,7 +13,17 @@ hypothetical ad request.** It is not the zone's roster. It is conditioned on geo
 on wall-clock time, and on per-group limits. An offer missing from one call is
 not evidence of anything until you have varied those inputs.
 
+## Network
+
+Every MCP business tool requires `network_id`. There is no active network, and `auth_status` does not tell you which one to use.
+
+- **Take it from the conversation.** Use the network the user named, or the one already used earlier in this conversation. Map a name to its ID with `network_list`.
+- **None in the conversation yet:** show `network_list` and ask. Never guess, and never default to the first one.
+- **Keep it** until the user explicitly asks to switch to another network. Never switch on your own, not even after an error.
+- **Name it in the answer** (`network <network_id>`), so a wrong network is visible.
+
 ## Inputs
+- `network_id` — required, see Network above.
 - `zoneId` — required.
 - Geo — **required in practice**, see below.
 - `adFeedCount` — optional; defaults to the zone's own `adFeedCount`.
@@ -24,7 +34,7 @@ not evidence of anything until you have varied those inputs.
 Always send a coherent set:
 
 ```
-get_zone_ads({ zoneId, debug: true,
+get_zone_ads({ network_id, zoneId, debug: true,
                geoCountry: "US", geoState: "TX",
                geoPostal: "75201", geoCity: "Dallas" })
 ```
@@ -50,10 +60,10 @@ geo cannot distinguish "filtered" from "absent".
 
 Work in this order and stop as soon as one step explains it.
 
-1. **`explain_serve({ zoneId, adGroupId })`** — the config verdict. If it returns
+1. **`explain_serve({ network_id, zoneId, adGroupId })`** — the config verdict. If it returns
    `eligible: false`, the answer is in `reasons[]` and you are done. If `eligible:
    true`, the config is fine and the cause is runtime — continue.
-2. **`get_ad_group({ id, include: ["parents"] })`** — read, in this order:
+2. **`get_ad_group({ network_id, id, include: ["parents"] })`** — read, in this order:
    - `enabled` and `archived`
    - `geo[]` — is your test geo in it?
    - `params.dateTimeUTC` / `params.dateTimeVisitor` — dayparting
@@ -66,7 +76,7 @@ Work in this order and stop as soon as one step explains it.
    visitor's local zone, so it can only pass when geo was supplied.
 4. **Re-run `get_zone_ads` with debug and an in-list geo.** If the offer now
    appears, there is no defect — report the actual constraint.
-5. **`get_zone_report({ id: zoneId, startDate, endDate })`** — ground truth. If
+5. **`get_zone_report({ network_id, id: zoneId, startDate, endDate })`** — ground truth. If
    the offer shows impressions and revenue, it demonstrably serves, and any
    remaining absence is a question about your request parameters, not about the
    offer.
@@ -97,7 +107,7 @@ never read the array top-down and call element 0 the winner.
 
 ## Reporting
 
-State the geo and UTC token every call was made under — a serving result without
+State the network, geo and UTC token every call was made under — a serving result without
 its inputs is unreproducible. When an offer is absent, name the specific
 constraint (`geo[] excludes OH`, `dateTimeUTC excludes thu09`) rather than
 "missing". Distinguish verified from inferred: if you did not re-run under a
@@ -106,12 +116,11 @@ passing condition, say the explanation is unconfirmed.
 For the worked example this procedure was derived from, see [reference.md](reference.md).
 
 ## Guardrails
-- Never pass `networkId` — it is session-scoped upstream. Confirm the active
-  network with `auth_status` first; a wrong network yields empty or foreign results.
+- Pass `network_id` on every call (see Network). A wrong network yields empty or
+  foreign results, so state the one you used.
 - On `"Error: Not authenticated…"` surface it and ask the user to re-authenticate;
   do not retry. On `"Error: Resource not found…"` the zone or ad group ID is wrong
-  — do not invent one. On `"Error: Forbidden…"` check the active network and offer
-  to switch.
+  — do not invent one. On `"Error: Forbidden…"` the user can't see that resource on the network you used: say which `network_id` you called with and ask whether they meant another network. Do not switch on your own.
 - `get_zone_ads` is a read against the live serving path. It is safe to repeat,
   but keep geo sets coherent (a ZIP that contradicts its state produces
   meaningless results).

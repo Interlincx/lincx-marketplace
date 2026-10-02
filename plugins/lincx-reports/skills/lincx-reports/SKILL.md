@@ -25,7 +25,7 @@ If the user did not give a date range, ask before doing anything. Do not start t
 
 If any tool returns `"Error: Not authenticated"`, stop and ask the user to run `auth_login` (you can mention it; do not run it for them — it opens a browser flow that requires their credentials).
 
-Every MCP business tool takes a `network_id` — there is no active network. If the user didn't name one, surface `network_list` results and ask which network to use, then pass that `network_id` on every call.
+Every MCP business tool takes a `network_id` — there is no active network. Take it from the conversation: the network the user named, or the one already used earlier in this conversation. If there is none yet, surface `network_list` results and ask. Pass that `network_id` on every call, and keep it until the user explicitly asks to switch to another network. Never switch on your own.
 
 ## What you never do
 

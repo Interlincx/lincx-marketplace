@@ -21,8 +21,7 @@ one; analyses are created in the Lincx UI. Your job is to find the run that alre
 answers the question and write the report on top of it. If none exists, say so and
 stop — never present a report built from a different zone or a different window.
 
-1. **Resolve inputs.** `network_id` (ask, or `network_list` and ask — every tool here
-   takes it), `zoneId` (6 lowercase alphanumerics), `dateStart`, `dateEnd`
+1. **Resolve inputs.** `network_id` (see Network below; every tool here takes it), `zoneId` (6 lowercase alphanumerics), `dateStart`, `dateEnd`
    (`YYYY-MM-DD`). **If the user did not give a date range, ask. Never default one.** A
    tier recommendation is only as good as its window, and a window you invented is a
    recommendation the user cannot audit.
@@ -100,9 +99,18 @@ On a `noLLM` run — the default — `output.json` ships with:
 **These are not missing data and you must never report them as such.** They are the
 slots you fill. Writing them is your job in this skill.
 
+## Network
+
+Every MCP business tool requires `network_id`. There is no active network, and `auth_status` does not tell you which one to use.
+
+- **Take it from the conversation.** Use the network the user named, or the one already used earlier in this conversation. Map a name to its ID with `network_list`.
+- **None in the conversation yet:** show `network_list` and ask. Never guess, and never default to the first one.
+- **Keep it** until the user explicitly asks to switch to another network. Never switch on your own, not even after an error.
+- **Name it in the answer** (`network <network_id>`), so a wrong network is visible.
+
 ## Guardrails
 
-- Never pass `networkId` — session-scoped upstream.
+- Pass `network_id` on every call (see Network) and name it in the report footer.
 - Never re-cluster, re-rank, or "correct" a tier assignment from the raw metrics. If a
   row looks misfiled, that is a finding to report (usually a `RANK_TIER_MISMATCH` flag),
   not a number to change.
