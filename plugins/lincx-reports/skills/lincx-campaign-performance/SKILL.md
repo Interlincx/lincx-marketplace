@@ -29,7 +29,7 @@ You produce a campaign-performance report. The output contract is `_shared/outpu
 
 ## Edge cases
 
-- **Empty result for a campaign you confirmed exists** → suggest checking with `auth_status` (right network?) and `get_event_stats_keys` (events being received?). Do not run them automatically.
+- **Empty result for a campaign you confirmed exists** → name the `network_id` you used and ask whether the campaign is on another network; suggest `get_event_stats_keys` (events being received?). Do not run it automatically.
 - **Truncated `report_query` response** → narrow the range and re-run; do not synthesize from the partial body.
 
 ## Cheatsheet

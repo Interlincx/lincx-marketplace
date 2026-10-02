@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 /**
- * Fail if any plugin doc names an MCP tool the Lincx MCP no longer registers.
+ * Fail if any plugin doc names an MCP tool the Lincx MCP no longer registers, or
+ * still assumes an active network (the org MCP needs `network_id` on every business
+ * tool call — issue #12).
  *
  * The per-plugin version of this check validated against a per-plugin snapshot that
  * nothing could refresh (see issue #8), so removed tools stayed "known" and passed.
@@ -71,6 +73,35 @@ function scanLine(line, at) {
   return { offenders, scanned };
 }
 
+// Tools that work without a network: auth and the network catalog itself.
+const NETWORK_FREE = ['auth_', 'network_'];
+// The old session-scoped rule. "there is no active network" is the new rule, so it passes.
+const ACTIVE_NETWORK_RE = /Never pass `networkId`|session-scoped|(?<!no )active network|offer to switch/i;
+
+/** Calls written as `tool({ … })` (any line span) that omit network_id, plus old-rule wording. */
+function scanNetwork(text, where) {
+  const offenders = [];
+  const lineAt = (i) => text.slice(0, i).split('\n').length;
+  for (const m of text.matchAll(/\b([a-z][a-z0-9_]*)\(\{/g)) {
+    const tool = m[1];
+    if (!known.has(tool) && !allowed.has(tool)) continue;
+    if (NETWORK_FREE.some((p) => tool.startsWith(p))) continue;
+    let depth = 0;
+    let j = m.index + tool.length + 1;
+    for (; j < text.length; j++) {
+      if (text[j] === '{') depth++;
+      else if (text[j] === '}' && --depth === 0) break;
+    }
+    const body = text.slice(m.index + tool.length + 2, j);
+    if (body.trim() === '...' || body.trim() === '…') continue; // placeholder, not a call shape
+    if (!/\bnetwork_id\b/.test(body)) offenders.push(`${where}:${lineAt(m.index)}: ${tool}({ … }) without network_id`);
+  }
+  text.split('\n').forEach((line, i) => {
+    if (ACTIVE_NETWORK_RE.test(line)) offenders.push(`${where}:${i + 1}: assumes an active network — network_id comes from the conversation`);
+  });
+  return offenders;
+}
+
 // The matchers are the whole check, so they get verified on every run — a regex that
 // silently stops matching would otherwise report a clean scan over nothing.
 function selfTest() {
@@ -89,6 +120,13 @@ function selfTest() {
   eq(hits('`mcp__claude_ai_lincx-mcp__get_zone`'), 0, 'qualified ref to a live tool');
   eq(hits('`save_template_version`'), 0, 'allowlisted bare ref');
   eq(hits('all `list_` tools take `network_id` over `start_date`'), 0, 'wildcard and field names');
+
+  const net = (text) => scanNetwork(text, 'x').length;
+  eq(net('`get_zone_ads({ zoneId, debug: true })`'), 1, 'business call without network_id');
+  eq(net('get_zone_ads({ network_id, zoneId,\n  geo: { state: "TX" } })'), 0, 'multi-line call with network_id');
+  eq(net('`auth_status({})` then `network_list({ limit: 5 })`'), 0, 'network-free tools');
+  eq(net('- Never pass `networkId` — it is session-scoped upstream.'), 1, 'old rule wording');
+  eq(net('Every tool takes `network_id` — there is no active network.'), 0, 'new rule wording');
 }
 
 selfTest();
@@ -98,7 +136,9 @@ let scanned = 0;
 
 for (const file of walk(join(repoRoot, 'plugins'))) {
   const where = relative(repoRoot, file);
-  readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+  const text = readFileSync(file, 'utf8');
+  offenders.push(...scanNetwork(text, where));
+  text.split('\n').forEach((line, i) => {
     const r = scanLine(line, `${where}:${i + 1}`);
     offenders.push(...r.offenders);
     scanned += r.scanned;
@@ -118,7 +158,7 @@ if (!scanned) {
 }
 
 if (offenders.length) {
-  console.error(`✘ ${offenders.length} stale MCP tool reference(s):\n${offenders.map((o) => `  ${o}`).join('\n')}`);
+  console.error(`✘ ${offenders.length} MCP reference problem(s):\n${offenders.map((o) => `  ${o}`).join('\n')}`);
   process.exit(1);
 }
 

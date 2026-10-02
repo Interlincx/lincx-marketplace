@@ -9,7 +9,7 @@ was made without geo.
 Zone `8z7wzb` (Quicken Loans Refinance - Match, Core Digital `7jdz0n`).
 
 `get_zone_targeting_inventory` reported 83 targeted ad groups, 11 fully live.
-`get_zone_ads({ zoneId: "8z7wzb", debug: true })` — **no geo parameters** —
+`get_zone_ads({ network_id, zoneId: "8z7wzb", debug: true })` — **no geo parameters** —
 returned 10 candidates. The one absent from the pool was `2q8meh`
 (JG Wentworth - Debt Relief - QL Refinance - Match).
 
@@ -23,7 +23,7 @@ Two supporting inferences were also wrong.
 
 ## What the offer's config actually said
 
-`get_ad_group({ id: "2q8meh" })`:
+`get_ad_group({ network_id, id: "2q8meh" })`:
 
 ```
 enabled: true
@@ -40,7 +40,7 @@ only one of the eleven live groups carrying **dayparting** — including
 `dateTimeVisitor`, which cannot be evaluated without a visitor timezone, which
 cannot be derived without geo.
 
-`explain_serve({ zoneId: "8z7wzb", adGroupId: "2q8meh" })` returned
+`explain_serve({ network_id, zoneId: "8z7wzb", adGroupId: "2q8meh" })` returned
 `eligible: true`, `reasons: []` — confirming config was never the problem.
 
 ## The two calls that settled it
@@ -48,7 +48,7 @@ cannot be derived without geo.
 Dallas, TX (in the allow-list):
 
 ```
-get_zone_ads({ zoneId: "8z7wzb", debug: true, geoCountry: "US",
+get_zone_ads({ network_id, zoneId: "8z7wzb", debug: true, geoCountry: "US",
                geoState: "TX", geoPostal: "75201", geoCity: "Dallas" })
 ```
 
@@ -57,7 +57,7 @@ get_zone_ads({ zoneId: "8z7wzb", debug: true, geoCountry: "US",
 Columbus, OH (not in the allow-list):
 
 ```
-get_zone_ads({ zoneId: "8z7wzb", debug: true, geoCountry: "US",
+get_zone_ads({ network_id, zoneId: "8z7wzb", debug: true, geoCountry: "US",
                geoState: "OH", geoPostal: "43215", geoCity: "Columbus" })
 ```
 
@@ -72,7 +72,7 @@ as both configs specify. Geo filtering works.
 
 ## Ground truth
 
-`get_zone_report({ id: "8z7wzb", startDate: "2026-09-01", endDate: "2026-09-02" })`
+`get_zone_report({ network_id, id: "8z7wzb", startDate: "2026-09-01", endDate: "2026-09-02" })`
 showed `2q8meh` delivering on both days — $52 / 259 impressions on Sept 1,
 $117 / 235 on Sept 2. It had been serving and earning the entire time.
 

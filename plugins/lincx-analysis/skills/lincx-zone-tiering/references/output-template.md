@@ -63,7 +63,7 @@ does not enact it.
 
 ## 5. Footer (one line, fixed format)
 
-`Source: analysis <analysisId> · zone <zoneId> · <YYYY-MM-DD> → <YYYY-MM-DD> <TZ> · <analysisType> · confidence <HIGH|MEDIUM|LOW> · deterministic engine, narrative by Claude`
+`Source: network <network_id> · analysis <analysisId> · zone <zoneId> · <YYYY-MM-DD> → <YYYY-MM-DD> <TZ> · <analysisType> · confidence <HIGH|MEDIUM|LOW> · deterministic engine, narrative by Claude`
 
 Append extra lines when they apply:
 
