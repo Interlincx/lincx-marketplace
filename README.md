@@ -6,7 +6,7 @@ A [Claude Code](https://claude.com/claude-code) plugin marketplace for Lincx. In
 
 | Plugin | What it does |
 |---|---|
-| **`templates-editor-plugin`** | Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code. Pulls templates via the Lincx MCP, gives you a live preview loop, and ships a save path that paste-drops a versioned artifact today and will push via a Lincx write tool once one lands. Ships with a reference library (production checklist, pattern snippets, anti-patterns, and 8 canonical example templates) that guides the LLM to write on-pattern code. |
+| **`templates-editor-plugin`** *(unlisted, see below)* | Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code. Pulls templates via the Lincx MCP, gives you a live preview loop, and ships a save path that paste-drops a versioned artifact today and will push via a Lincx write tool once one lands. Ships with a reference library (production checklist, pattern snippets, anti-patterns, and 8 canonical example templates) that guides the LLM to write on-pattern code. |
 | **`lincx-reports`** | Manager-friendly reports over the Lincx MCP — campaign performance, revenue summary, creative anomalies. Read-only, with a fixed four-part output contract so every answer is auditable. |
 | **`lincx-inventory`** | Inventory queries over Lincx config — exhaustive zone-targeting rollups with a live/off breakdown per ad group, plus a geo- and time-aware zone serving check that explains why an offer is or isn't in the `get_zone_ads` debug pool. |
 | **`lincx-analysis`** | Zone tier analysis. The platform's deterministic engine computes the tiers, ranks and risk flags; Claude writes the rationale, justifications and next actions on top. Skips the server-side LLM pass entirely, so the analysis prompt is a markdown file you can edit instead of a deploy. |
@@ -30,7 +30,7 @@ Install the marketplace and a plugin from any Claude Code session:
 
 ```
 /plugin marketplace add Interlincx/lincx-marketplace
-/plugin install templates-editor-plugin@lincx-marketplace
+/plugin install lincx-reports@lincx-marketplace
 /reload-plugins
 ```
 
@@ -39,14 +39,14 @@ Same commands work in the CLI, the desktop apps, the IDE extensions, and the web
 **Updating:** to pull the latest version of an installed plugin:
 
 ```
-/plugin update templates-editor-plugin@lincx-marketplace
+/plugin update lincx-reports@lincx-marketplace
 /reload-plugins
 ```
 
 **Uninstalling:**
 
 ```
-/plugin uninstall templates-editor-plugin@lincx-marketplace
+/plugin uninstall lincx-reports@lincx-marketplace
 /reload-plugins
 ```
 
@@ -60,7 +60,7 @@ Use this when you're working on the marketplace or want to try the plugin before
 
 ```
 /plugin marketplace add /absolute/path/to/lincx-marketplace
-/plugin install templates-editor-plugin@lincx-marketplace
+/plugin install lincx-reports@lincx-marketplace
 /reload-plugins
 ```
 
@@ -96,7 +96,7 @@ Then in Claude Code:
 
 ```
 /plugin marketplace add ~/code/lincx-marketplace
-/plugin install templates-editor-plugin@lincx-marketplace
+/plugin install lincx-reports@lincx-marketplace
 /reload-plugins
 ```
 
@@ -179,14 +179,17 @@ Upload each zip with `POST /v1/skills`, and pass the MCP as a tool: `{"type": "m
 Paste `SKILL.md` and the files it cites into the project or custom instructions. This only works if the app lets you add `https://mcp.lincx.com/mcp` as a custom MCP connector. Without it, the model has no Lincx tools.
 
 Limits outside Claude Code:
-- Slash commands (`/zone-targeted`, `/lincx-template-*`) and hooks aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
+- Slash commands (`/zone-targeted`, `/zone-serving-check`) and hooks aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
 - `lincx-reports` is a router over three sibling skills, so install all four together.
-- `editing-lincx-templates` runs `node scripts/…` for its preview loop. It needs an agent with shell access (Codex, Gemini CLI, Grok Build, Copilot agent mode). Chat-only UIs can still write templates but can't preview them. There's no hook, so re-run the preview after each edit.
-- `editing-lincx-templates` also calls `get_template_preview_bundle`, which lincx-mcp doesn't register yet (#8). That gap applies in Claude Code too.
+- The template editor (`editing-lincx-templates`) is not built until its MCP tools ship, see below.
 
 ---
 
 ## Using `templates-editor-plugin`
+
+> **Unlisted until its MCP tools ship (#13).** The plugin depends on `get_template_preview_bundle` and `save_template_version`, which the Lincx MCP doesn't expose yet. So loading a template for preview and saving back to Lincx don't work. It is removed from `.claude-plugin/marketplace.json`, so `/plugin install` can't find it, and from the portable build. The code stays in `plugins/templates-editor-plugin/`. Devs can still try it with the symlink flow (Option B, pointing at `plugins/templates-editor-plugin`). Re-list it by adding its entry back to `marketplace.json` once the tools are live.
+>
+> If you already installed it, remove it: `/plugin uninstall templates-editor-plugin@lincx-marketplace`, then `/reload-plugins`. Once the marketplace refreshes, `/plugin update` can't find the plugin, so the broken install would otherwise stay in place.
 
 Once installed, you'll have these slash commands available in any Claude Code session where the Lincx MCP is connected:
 

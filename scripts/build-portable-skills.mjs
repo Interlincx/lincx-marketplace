@@ -10,6 +10,9 @@
  * `${CLAUDE_PLUGIN_ROOT}/` to a path relative to the skill. Commands and hooks
  * are not copied; they only exist in Claude Code.
  *
+ * Only plugins listed in .claude-plugin/marketplace.json are built, so unlisting a
+ * plugin (e.g. templates-editor-plugin until its MCP tools ship, #13) drops it here too.
+ *
  * Exits non-zero if a built skill breaks the spec or still references something
  * outside its folder.
  *
@@ -108,7 +111,8 @@ rmSync(outDir, { recursive: true, force: true });
 const problems = [];
 const built = [];
 const pluginsDir = join(repoRoot, 'plugins');
-for (const plugin of readdirSync(pluginsDir)) {
+const marketplace = JSON.parse(readFileSync(join(repoRoot, '.claude-plugin/marketplace.json'), 'utf8'));
+for (const plugin of marketplace.plugins.map((p) => relative(pluginsDir, join(repoRoot, p.source)))) {
   const skillsDir = join(pluginsDir, plugin, 'skills');
   if (!existsSync(skillsDir)) continue;
   for (const name of readdirSync(skillsDir)) {
