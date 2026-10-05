@@ -58,7 +58,7 @@ ENTRY_ID=$(node --input-type=module -e "
 # 6. Debounce: marker < 2 s old → skip.
 if [ -f "$MARKER" ]; then
   NOW=$(date +%s)
-  MARK_AT=$(stat -f %m "$MARKER" 2>/dev/null || stat -c %Y "$MARKER" 2>/dev/null || echo 0)
+  MARK_AT=$(stat -c %Y "$MARKER" 2>/dev/null || stat -f %m "$MARKER" 2>/dev/null || echo 0)
   AGE=$(( NOW - MARK_AT ))
   if [ "$AGE" -lt 2 ]; then
     log "debounced entry=$ENTRY_ID (age=${AGE}s)"

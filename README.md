@@ -106,7 +106,14 @@ Pull updates with `git pull` in the clone, then `/reload-plugins`.
 
 ## Install on other agents (ChatGPT, Codex, Grok, Gemini, Copilot)
 
-The skills follow the open [Agent Skills](https://agentskills.io) format: a folder with a `SKILL.md`. Other agents can load them too. Build self-contained copies first:
+The skills follow the open [Agent Skills](https://agentskills.io) format: a folder with a `SKILL.md`. Other agents can load them too. Get self-contained copies from the latest release (no Node needed):
+
+```bash
+curl -fsSL -o lincx-skills.zip https://github.com/Interlincx/lincx-marketplace/releases/latest/download/lincx-skills.zip
+rm -rf dist/skills && mkdir -p dist/skills && unzip -o lincx-skills.zip -d dist/skills
+```
+
+Or build them from a clone:
 
 ```
 node scripts/build-portable-skills.mjs   # writes dist/skills/<skill-name>/
@@ -177,6 +184,19 @@ Upload each zip with `POST /v1/skills`, and pass the MCP as a tool: `{"type": "m
 ### Grok chat, or any other chat app
 
 Paste `SKILL.md` and the files it cites into the project or custom instructions. This only works if the app lets you add `https://mcp.lincx.com/mcp` as a custom MCP connector. Without it, the model has no Lincx tools.
+
+### Staying up to date
+
+Every release is a `v*` tag. Its release carries two files at stable URLs:
+
+- `https://github.com/Interlincx/lincx-marketplace/releases/latest/download/manifest.json`: `{ "version": "v1.2.0", "skills": { "<name>": { "sha256": "…" } } }`
+- `https://github.com/Interlincx/lincx-marketplace/releases/latest/download/lincx-skills.zip`: every skill folder at the zip root
+
+For a bot (e.g. Grok Bot), give it this instruction once:
+
+> Daily, fetch the Lincx `manifest.json` URL above. If `version` differs from the one you last installed, download `lincx-skills.zip` and reinstall each skill whose `sha256` changed. Remove skills that are no longer listed. Then remember the new `version` and each skill's `sha256`.
+
+To watch without polling the manifest, the release feed is `https://github.com/Interlincx/lincx-marketplace/releases.atom`.
 
 Limits outside Claude Code:
 - Slash commands (`/zone-targeted`, `/zone-serving-check`) and hooks aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
@@ -262,6 +282,14 @@ Plugin architecture docs, the full design spec, and the implementation plan live
 ## Publishing
 
 The marketplace is published at [Interlincx/lincx-marketplace](https://github.com/Interlincx/lincx-marketplace). It is public, so the `/plugin marketplace add Interlincx/lincx-marketplace` flow in the "for end users" section works from any Claude Code session.
+
+To ship skill changes to other agents, tag `main` after merging:
+
+```bash
+git tag v1.2.0 && git push origin v1.2.0
+```
+
+`.github/workflows/release-skills.yml` runs every plugin's tests and builds the skills plus `manifest.json`. It then creates the GitHub Release with `lincx-skills.zip` and `manifest.json` attached. A failing test means no release. The release also runs `check-mcp-tool-refs.mjs`, which fails once `mcp-tools.json` is more than 90 days old; run `node scripts/sync-mcp-tools.mjs` before tagging if it is. Bump the minor version for skill changes, and the major version when a skill is removed or renamed.
 
 ---
 
