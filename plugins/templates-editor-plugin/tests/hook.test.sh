@@ -65,9 +65,9 @@ cat > "$DIR/.lincx-session.json" <<EOF
 ] }
 EOF
 CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK" <<<'{"tool_input":{"file_path":"'"$DIR"'/ads/a.html"}}' >/dev/null 2>&1
-FIRST_MARK=$(stat -f %m "$DIR/.lincx-session.preview.pending" 2>/dev/null || stat -c %Y "$DIR/.lincx-session.preview.pending" 2>/dev/null)
+FIRST_MARK=$(stat -c %Y "$DIR/.lincx-session.preview.pending" 2>/dev/null || stat -f %m "$DIR/.lincx-session.preview.pending")
 CLAUDE_PROJECT_DIR="$DIR" CLAUDE_PLUGIN_ROOT="$PLUGIN_ROOT" bash "$HOOK" <<<'{"tool_input":{"file_path":"'"$DIR"'/ads/a.html"}}' >/dev/null 2>&1
-SECOND_MARK=$(stat -f %m "$DIR/.lincx-session.preview.pending" 2>/dev/null || stat -c %Y "$DIR/.lincx-session.preview.pending" 2>/dev/null)
+SECOND_MARK=$(stat -c %Y "$DIR/.lincx-session.preview.pending" 2>/dev/null || stat -f %m "$DIR/.lincx-session.preview.pending")
 if [ "$FIRST_MARK" = "$SECOND_MARK" ]; then
   pass "case 4: rapid second fire debounced"
 else

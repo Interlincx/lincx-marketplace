@@ -1,0 +1,39 @@
+# Publish the portable skills on every version tag (issue #14).
+#
+#   git tag v1.2.0 && git push origin v1.2.0
+#
+# Bots watch the stable "latest" URLs:
+#   https://github.com/Interlincx/lincx-marketplace/releases/latest/download/manifest.json
+#   https://github.com/Interlincx/lincx-marketplace/releases/latest/download/lincx-skills.zip
+name: Release skills
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test every plugin
+        run: for t in plugins/*/tests/run-all.sh; do bash "$t"; done
+
+      - name: Build skills and manifest
+        run: node scripts/build-portable-skills.mjs dist/skills --manifest=dist/manifest.json --version="$GITHUB_REF_NAME"
+
+      - name: Zip skills
+        run: cd dist/skills && zip -qr ../lincx-skills.zip .
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/lincx-skills.zip dist/manifest.json --generate-notes --verify-tag
