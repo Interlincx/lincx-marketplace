@@ -16,14 +16,26 @@
  * Exits non-zero if a built skill breaks the spec or still references something
  * outside its folder.
  *
- * Usage: node scripts/build-portable-skills.mjs [outDir]
+ * With --manifest=<file>, also writes { version, skills: { <name>: { sha256 } } } so a
+ * bot can reinstall only the skills whose hash changed (issue #14). --version sets the
+ * version string (the release workflow passes the tag).
+ *
+ * Usage: node scripts/build-portable-skills.mjs [outDir] [--manifest=<file>] [--version=<v>]
  */
 import { cpSync, existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = resolve(process.argv[2] ?? join(repoRoot, 'dist/skills'));
+const args = process.argv.slice(2);
+const flag = (name) => args.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
+const unknown = args.filter((a) => a.startsWith('--') && !/^--(manifest|version)=/.test(a));
+if (unknown.length) {
+  console.error(`✘ unknown option(s): ${unknown.join(' ')} (use --manifest=<file> --version=<v>)`);
+  process.exit(1);
+}
+const outDir = resolve(args.find((a) => !a.startsWith('--')) ?? join(repoRoot, 'dist/skills'));
 
 // Plugin-level dirs a skill reaches through ${CLAUDE_PLUGIN_ROOT}/.
 const PLUGIN_ROOT_DIRS = ['references', 'scripts'];
@@ -79,6 +91,15 @@ function build(skillDir, pluginDir, dest) {
   }
 }
 
+/** Content hash of one built skill: every file's relative path and bytes, in sorted order. */
+function hashSkill(dest) {
+  const h = createHash('sha256');
+  for (const file of [...walk(dest)].map((f) => relative(dest, f)).sort()) {
+    h.update(`${file}\0`).update(readFileSync(join(dest, file))).update('\0');
+  }
+  return h.digest('hex');
+}
+
 function check(dest, name) {
   const problems = [];
   const fm = frontmatter(readFileSync(join(dest, 'SKILL.md'), 'utf8'));
@@ -131,6 +152,12 @@ if (!built.length) problems.push('built no skills at all — plugins/*/skills/*/
 if (problems.length) {
   console.error(`✘ ${problems.length} portability problem(s):\n${problems.map((p) => `  ${p}`).join('\n')}`);
   process.exit(1);
+}
+
+const manifestPath = flag('manifest');
+if (manifestPath) {
+  const skills = Object.fromEntries(built.sort().map((name) => [name, { sha256: hashSkill(join(outDir, name)) }]));
+  writeFileSync(resolve(manifestPath), `${JSON.stringify({ version: flag('version') ?? 'dev', skills }, null, 2)}\n`);
 }
 
 console.log(`✔ ${built.length} portable skills in ${relative(repoRoot, outDir) || outDir}: ${built.join(', ')}`);
