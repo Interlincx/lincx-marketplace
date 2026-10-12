@@ -7,6 +7,12 @@
 > doc is kept for the data-model findings and rollup semantics, which the MCP tool
 > ports verbatim.
 
+> **Note (2026-10-13):** `fully_live` still checks only `zoneId` scoping and the
+> enabled chain, not the group's other targeting rules (template, device, geo,
+> daypart, custom keys) or a CAG mismatch. Whether a group actually serves is
+> `get_zone_eligible_ad_groups` / `explain_serve` (`verdict: eligible | conditional
+> | excluded`), and their live counts can be lower than this rollup's by design.
+
 > Workflow #1: "For zone X, list every ad group directly targeted to it, and for
 > each tell me whether it's fully live — campaign, ad group, and ad all enabled
 > with a viable creative attached — or where it's off."

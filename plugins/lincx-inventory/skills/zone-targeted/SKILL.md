@@ -47,6 +47,18 @@ Every MCP business tool requires `network_id`. There is no active network, and `
      returned ids only — re-run once per `mode` (`live` then `off`) to get the full
      detail in splits; never present it as complete. Otherwise the response is
      complete with names — do not caveat completeness.
+   - If the result is **one line with no JSON**, the zone itself serves nothing (it
+     is archived, its channel is missing, or it has segments on, no segments, and
+     fails its own lists). Report that line; there is no table.
+   - If the header carries a **NOTE** (`zone.refusesDefaultVisits` /
+     `zone.servesOnlyPinnedVisits`), the zone serves only some visits — repeat it
+     above the table.
+3. Say what **fully live** does not cover: it ignores the group's own rules beyond
+   `zoneId` (template, device, geo, daypart, custom keys) and a CAG mismatch, so a
+   fully-live group can still never serve here, or serve only on some visits. When
+   the question is whether a group actually serves, use `get_zone_eligible_ad_groups`
+   (each row's `verdict`; `directlyTargetedLive` counts eligible groups only, so it
+   can be lower than this table's live count) or `explain_serve` for one group.
 
 ## Guardrails
 - Pass `network_id` on every call (see Network), and name it in the answer.
@@ -56,4 +68,5 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 
 ## Out of scope
 "Free radicals" — ad groups targeting no zone that still render via the zone's shared
-CAG. Eligibility, not direct targeting; a later `mode` on the composite.
+CAG — and groups only a zone default keeps out. Eligibility, not direct targeting;
+use `get_zone_eligible_ad_groups` (`freeRadicals`, `excludedByDefault`).
