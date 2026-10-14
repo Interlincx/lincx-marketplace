@@ -283,6 +283,8 @@ Plugin architecture docs, the full design spec, and the implementation plan live
 
 The marketplace is published at [Interlincx/lincx-marketplace](https://github.com/Interlincx/lincx-marketplace). It is public, so the `/plugin marketplace add Interlincx/lincx-marketplace` flow in the "for end users" section works from any Claude Code session.
 
+A change to a plugin reaches installed Claude Code users only when that plugin's `version` in `.claude-plugin/plugin.json` is bumped; otherwise `/plugin update` keeps their cached copy. Bump it in the same PR as the change. Don't set `version` in `.claude-plugin/marketplace.json` too: `plugin.json` takes precedence.
+
 To ship skill changes to other agents, tag `main` after merging:
 
 ```bash
