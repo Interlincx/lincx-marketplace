@@ -56,7 +56,9 @@ for (const p of [
 ]) check(existsSync(join(pluginRoot, p)), `missing command: ${p}`);
 
 // skill
-check(existsSync(join(pluginRoot, 'skills/editing-lincx-templates/SKILL.md')), 'missing skill: editing-lincx-templates');
+for (const f of ['editing-lincx-templates/SKILL.md', 'lincx-template-playbook/SKILL.md', 'lincx-template-playbook/baselines.md', 'lincx-template-playbook/full-build.md']) {
+  check(existsSync(join(pluginRoot, 'skills', f)), `missing skill file: ${f}`);
+}
 
 // hook
 const hookJson = join(pluginRoot, 'hooks/hooks.json');
