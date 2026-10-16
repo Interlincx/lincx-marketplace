@@ -34,7 +34,7 @@ const NOT_TOOLS = new Set([
 
 // Verb prefixes the MCP actually uses. `create_`/`explain_` are here because
 // create_analysis and explain_serve were both invisible to the old prefix list.
-const TOOL_PREFIXES = ['list_', 'get_', 'auth_', 'network_', 'report_', 'create_', 'explain_', 'render_', 'zone_load_'];
+const TOOL_PREFIXES = ['list_', 'get_', 'auth_', 'network_', 'report_', 'create_', 'update_', 'explain_', 'render_', 'zone_load_'];
 
 // `some_tool` and `some_tool({ ... })` in backticks, plus mcp__<server>__<tool> refs.
 const BACKTICKED_RE = /`([a-z][a-z0-9_]*)\s*[`(]/g;
