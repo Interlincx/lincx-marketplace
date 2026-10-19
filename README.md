@@ -285,13 +285,13 @@ The marketplace is published at [Interlincx/lincx-marketplace](https://github.co
 
 A change to a plugin reaches installed Claude Code users only when that plugin's `version` in `.claude-plugin/plugin.json` is bumped; otherwise `/plugin update` keeps their cached copy. Bump it in the same PR as the change. Don't set `version` in `.claude-plugin/marketplace.json` too: `plugin.json` takes precedence.
 
-To ship skill changes to other agents, tag `main` after merging:
+Skill changes reach other agents through GitHub Releases. Every merge to `main` that touches `plugins/**`, `scripts/**`, `mcp-tools.json` or `.claude-plugin/marketplace.json` publishes the next patch version (v1.0.1, v1.0.2, ...); README-only merges don't release. For a bigger jump, push the tag yourself after merging, and the next automatic release continues from it (v1.2.0, then v1.2.1):
 
 ```bash
 git tag v1.2.0 && git push origin v1.2.0
 ```
 
-`.github/workflows/release-skills.yml` runs every plugin's tests and builds the skills plus `manifest.json`. It then creates the GitHub Release with `lincx-skills.zip` and `manifest.json` attached. A failing test means no release. The release also runs `check-mcp-tool-refs.mjs`, which fails once `mcp-tools.json` is more than 90 days old; run `node scripts/sync-mcp-tools.mjs` before tagging if it is. Bump the minor version for skill changes, and the major version when a skill is removed or renamed.
+`.github/workflows/release-skills.yml` runs every plugin's tests, builds the skills plus `manifest.json`, and creates the GitHub Release (and the tag, for automatic ones) with `lincx-skills.zip` and `manifest.json` attached. A failing test means no tag and no release. The tests include `check-mcp-tool-refs.mjs`, which fails once `mcp-tools.json` is more than 90 days old; run `node scripts/sync-mcp-tools.mjs` and merge that before it blocks releases. Bump the minor version yourself (push a tag) for new skills, and the major version when a skill is removed or renamed.
 
 ---
 

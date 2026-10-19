@@ -1,6 +1,13 @@
-# Publish the portable skills on every version tag (issue #14).
+# Publish the portable skills (issue #14, #25).
+#
+# Every merge to main that touches the skills gets the next patch release
+# (v1.0.1, v1.0.2, ...). For a bigger jump, push the tag yourself:
 #
 #   git tag v1.2.0 && git push origin v1.2.0
+#
+# and the next automatic release becomes v1.2.1. This workflow creates the
+# tag itself (`gh release create`): a tag pushed with the built-in token would
+# not start another workflow, so a separate auto-tag workflow could not work.
 #
 # Bots watch the stable "latest" URLs:
 #   https://github.com/Interlincx/lincx-marketplace/releases/latest/download/manifest.json
@@ -9,31 +16,60 @@ name: Release skills
 
 on:
   push:
+    branches: [main]
+    # Not evaluated for tag pushes, so a hand-pushed tag always releases.
+    paths: ['plugins/**', 'scripts/**', 'mcp-tools.json', '.claude-plugin/marketplace.json']
     tags: ['v*']
 
 permissions:
   contents: write
+
+# One release at a time so two quick merges can't pick the same version.
+concurrency: release-skills
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pick version
+        id: v
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "version=$GITHUB_REF_NAME" >> "$GITHUB_OUTPUT"
+          elif git tag --points-at HEAD | grep -q '^v'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            last=$(git tag -l 'v*' --sort=-v:refname | head -1)
+            IFS=. read -r MA MI PA <<< "${last:-v1.0.-1}"
+            echo "version=v${MA#v}.$MI.$((PA+1))" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: actions/setup-node@v4
+        if: steps.v.outputs.skip != 'true'
         with:
           node-version: 22
 
       - name: Test every plugin
+        if: steps.v.outputs.skip != 'true'
         run: for t in plugins/*/tests/run-all.sh; do bash "$t"; done
 
       - name: Build skills and manifest
-        run: node scripts/build-portable-skills.mjs dist/skills --manifest=dist/manifest.json --version="$GITHUB_REF_NAME"
+        if: steps.v.outputs.skip != 'true'
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: node scripts/build-portable-skills.mjs dist/skills --manifest=dist/manifest.json --version="$VERSION"
 
       - name: Zip skills
+        if: steps.v.outputs.skip != 'true'
         run: cd dist/skills && zip -qr ../lincx-skills.zip .
 
       - name: Publish release
+        if: steps.v.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" dist/lincx-skills.zip dist/manifest.json --generate-notes --verify-tag
+          VERSION: ${{ steps.v.outputs.version }}
+        run: gh release create "$VERSION" dist/lincx-skills.zip dist/manifest.json --target "$GITHUB_SHA" --generate-notes --latest
