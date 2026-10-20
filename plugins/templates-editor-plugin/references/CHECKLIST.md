@@ -157,24 +157,27 @@ Any of these may be **absent**, **renamed**, or have **different types** in the 
 
 ## 8. JavaScript conventions
 
-- [ ] Wrap initialization in an IIFE `(() => { ... })()` OR a `DOMContentLoaded` check.
-- [ ] Standard boilerplate at top:
+- [ ] Wrap initialization in an IIFE `(() => { ... })()`; a `DOMContentLoaded` check goes inside it, never in place of it.
+- [ ] Standard boilerplate: capture the zone's mount once, synchronously, in the IIFE and pass it to every helper (`patterns.md` intro):
 
 ```js
-if (document.readyState === 'complete' || document.readyState === 'interactive') {
-  init()
-} else {
-  document.addEventListener('DOMContentLoaded', init)
-}
+;(() => {
+  const zone = document.currentScript.parentElement
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    init(zone)
+  } else {
+    document.addEventListener('DOMContentLoaded', () => init(zone))
+  }
+})()
 ```
 
 - [ ] **Never** use `localStorage`, `sessionStorage`, or cookies — ads run in iframes where this fails.
 - [ ] No external libraries except ShareThis (only when explicitly requested).
-- [ ] For CTAs in `cta_list`, implement `handleCtaListSplits()`:
+- [ ] For CTAs in `cta_list`, implement `handleCtaListSplits(zone)`:
 
 ```js
-function handleCtaListSplits() {
-  document.querySelectorAll('.listicle__list__cta a, .actions .btn').forEach((cta, index) => {
+function handleCtaListSplits(zone) {
+  zone.querySelectorAll('.listicle__list__cta a, .actions .btn').forEach((cta, index) => {
     const parts = (cta.dataset.element || '').split('|')
     cta.textContent = parts[0]
     cta.href = parts[1]
@@ -184,10 +187,10 @@ function handleCtaListSplits() {
 }
 ```
 
-- [ ] For videos, implement `initVideoPlayback()` with pause/ended listeners to guarantee autoplay.
+- [ ] For videos, implement `initVideoPlayback(zone)` with pause/ended listeners to guarantee autoplay.
 - [ ] For lazy-load media, use `IntersectionObserver` with `threshold: 0.3` and swap `data-src` → `src`.
 - [ ] For GIF/WebP inside `<video>` tags, replace the element with `<img>` at lazy-load time.
-- [ ] For listicles with ordering, implement `initGroupOffer()` that:
+- [ ] For listicles with ordering, implement `initGroupOffer(zone)` that searches only within the zone's mount and:
   1. Keeps the first `.listicle` in place
   2. Groups the rest by `data-group`
   3. Reorders by `groupKeys = ['high']` priority
@@ -216,8 +219,8 @@ function handleCtaListSplits() {
 
 - [ ] Place outside the `{{#ads}}` loop, inside the wrapper.
 - [ ] Include advertising disclosure, trademark disclaimer, and (for health offers) health disclaimer.
-- [ ] Dynamic year: `document.getElementById('year').textContent = new Date().getFullYear()`.
-- [ ] Dynamic hostname: `document.getElementById('location').textContent = window.location.hostname`.
+- [ ] Dynamic year: `const yearEl = footer.querySelector('.footer-year')`, then `if (yearEl) yearEl.textContent = new Date().getFullYear()`, where `footer` is this zone's footer (`patterns.md` §14), never an id lookup.
+- [ ] Dynamic hostname: `const locEl = footer.querySelector('.footer-location')`, then `if (locEl) locEl.textContent = window.location.hostname`.
 - [ ] Guard with `if (element)` checks — do not assume the element exists.
 
 ---

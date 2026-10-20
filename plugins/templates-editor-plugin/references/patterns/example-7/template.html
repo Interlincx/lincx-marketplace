@@ -115,18 +115,8 @@
   </div>
 
   <script>
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-      // DOM is ready
-      console.log('DOM is ready!')
-      setupLazyLoad()
-    } else {
-      document.addEventListener('DOMContentLoaded', function () {
-        setupLazyLoad()
-      })
-    }
-
-    function setupLazyLoad() {
-      const lazyElements = document.querySelectorAll('.listicle__thumbnail.lazy-load')
+    function setupLazyLoad(zone) {
+      const lazyElements = zone.querySelectorAll('.listicle__thumbnail.lazy-load')
       lazyElements.forEach((element) => {
         const lazyLoad = (entries, observer) => {
           entries.forEach((entry) => {
@@ -184,8 +174,8 @@
       })
     }
 
-    function initVideoPlayback() {
-      const videos = document.querySelectorAll('.video-thumbnail')
+    function initVideoPlayback(zone) {
+      const videos = zone.querySelectorAll('.video-thumbnail')
 
       videos.forEach((video) => {
         // Function to ensure video keeps playing
@@ -215,8 +205,8 @@
       })
     }
 
-    function handleCtaListSplits() {
-      const ctaList = document.querySelectorAll('.listicle__list__cta a')
+    function handleCtaListSplits(zone) {
+      const ctaList = zone.querySelectorAll('.listicle__list__cta a')
       ctaList.forEach((cta, index) => {
         const content = cta.dataset.element
         const ctaSplit = content.split('|')
@@ -224,7 +214,7 @@
         cta.textContent = ctaSplit[0]
       })
 
-      const listicle = document.querySelectorAll('.listicle')
+      const listicle = zone.querySelectorAll('.listicle')
       listicle.forEach((card) => {
         const ctaList = card.querySelectorAll('.listicle__list__cta a')
         ctaList.forEach((cta, index) => {
@@ -233,21 +223,21 @@
       })
     }
 
-    function addNumberToHeadlines() {
-      const headlines = document.querySelectorAll('.subheading[data-content]:not([data-content=""])')
+    function addNumberToHeadlines(zone) {
+      const headlines = zone.querySelectorAll('.subheading[data-content]:not([data-content=""])')
       const count = headlines.length
       headlines.forEach((headline, index) => {
         headline.innerHTML = `<span class="number">${count - index}.</span> ${headline.innerHTML}`
       })
     }
     ;(() => {
-      function renderCurrentDate(selector) {
+      function renderCurrentDate(zone, selector) {
         const date = new Date()
         date.setDate(date.getDate() - 4)
         const options = { year: 'numeric', month: 'long', day: '2-digit' }
         const formattedDate = date.toLocaleDateString('en-US', options)
 
-        const element = document.querySelector(selector)
+        const element = zone.querySelector(selector)
         if (element) {
           element.textContent = formattedDate
         } else {
@@ -255,17 +245,17 @@
         }
       }
 
-      function renderDynamicMonth() {
+      function renderDynamicMonth(zone) {
         const month = new Date().toLocaleString('en-US', { month: 'long' })
-        document.querySelectorAll('.dynamic_month').forEach((el) => {
+        zone.querySelectorAll('.dynamic_month').forEach((el) => {
           el.textContent = month
         })
       }
 
-      function initGroupOffer() {
+      function initGroupOffer(zone) {
         const groupKeys = ['high']
-        const listicles = document.querySelectorAll('.listicle')
-        const container = document.querySelector('.lincx-container')
+        const listicles = zone.querySelectorAll('.listicle')
+        const container = zone.querySelector('.lincx-container')
 
         // Get all listicles except the first one
         const listiclesArray = Array.from(listicles).slice(1)
@@ -296,21 +286,31 @@
         })
 
         let rank = 0
-        document.querySelectorAll('.listicle').forEach((listicle) => {
+        zone.querySelectorAll('.listicle').forEach((listicle) => {
           listicle.setAttribute('data-rank', rank)
           rank++
         })
 
-        renderCurrentDate('.listicle__published--date')
-        renderDynamicMonth()
-        handleCtaListSplits()
+        renderCurrentDate(zone, '.listicle__published--date')
+        renderDynamicMonth(zone)
+        handleCtaListSplits(zone)
         //initializeThumbnails()
-        initVideoPlayback()
+        initVideoPlayback(zone)
       }
 
-      initGroupOffer()
+      // lincx-core appends inline scripts to the zone's mount, beside the markup.
+      const zone = document.currentScript.parentElement
+      if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setupLazyLoad(zone)
+      } else {
+        document.addEventListener('DOMContentLoaded', function () {
+          setupLazyLoad(zone)
+        })
+      }
 
-      addNumberToHeadlines()
+      initGroupOffer(zone)
+
+      addNumberToHeadlines(zone)
     })()
   </script>
 
@@ -326,14 +326,19 @@
 
     // Usage
     addShareThisScript()
-    var yearElement = document.getElementById('year')
-    if (yearElement) {
-      yearElement.textContent = new Date().getFullYear()
-    }
-    var locationElement = document.getElementById('location')
-    if (locationElement) {
-      locationElement.textContent = window.location.hostname
-    }
+    ;(() => {
+      const scope = document.currentScript.parentElement
+      const footer = scope.matches('.footer') ? scope : scope.querySelector('.footer')
+      if (!footer) return
+      const yearElement = footer.querySelector('.footer-year')
+      if (yearElement) {
+        yearElement.textContent = new Date().getFullYear()
+      }
+      const locationElement = footer.querySelector('.footer-location')
+      if (locationElement) {
+        locationElement.textContent = window.location.hostname
+      }
+    })()
   </script>
   <footer class="footer">
     <p>

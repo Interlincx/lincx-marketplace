@@ -8,7 +8,7 @@ The reference listicle: multi-ad article-style placement. Author bar, media thum
 - Triple-brace for HTML-authored fields (`listical_headline`, `offer_headline`, `offer_text`).
 - The **`data-content` / `data-show`** show/hide pattern applied consistently across headline, info bar, image thumbnail, video thumbnail, multi-CTA block, primary CTA.
 - **Dual thumbnail elements** per ad (image branch + video branch) — each hidden when its source is empty, and each containing a non-anchor fallback triggered by `data-show="{{ cta_text }}"`.
-- Inline `<script>` with three core helpers: `setupLazyLoad()`, `initVideoPlayback()`, `initGroupOffer()` — run in the order `initGroupOffer → renderCurrentDate → initVideoPlayback`. `setupLazyLoad()` also runs at the end of `initGroupOffer()` because reordering invalidates previously-bound observers.
+- Inline `<script>` with three core helpers: `setupLazyLoad(zone)`, `initVideoPlayback(zone)`, `initGroupOffer(zone)`. Each takes the zone's mount and searches only inside it (`patterns.md` intro). The closing IIFE reads `zone` from `document.currentScript.parentElement`, sets up lazy-load, then runs `initGroupOffer → renderCurrentDate → initVideoPlayback`. `setupLazyLoad(zone)` also runs at the end of `initGroupOffer(zone)` because reordering invalidates previously-bound observers.
 - Full footer disclosure block (all paragraphs present).
 - Works with the `cta_list` pattern via `{{#cta_list}}{{.}}{{/cta_list}}` — a plain-text list, not pipe-split.
 
@@ -24,4 +24,4 @@ See `patterns.md` §1 (wrapper + ads loop), §2 (numbered subheading), §3 (mult
 - **Breakpoint inconsistency**: the layout uses 576/768/992/1200 for container widths but 1024 for type scaling (`.heading`, `.subheading`, `.listicle__info`). Tolerate it. Don't refactor wholesale. If you add a new rule, use 992 to match the container breakpoints.
 - **`alt="{{ src_author }}"`** on the author avatar reads as a URL to screen readers. Known a11y nit; kept for parity with production. Prefer `alt="{{ author_name }}"` if you write a variant.
 - **Counter hack**: `.listicle[data-heading=''] { counter-increment: index; }` means empty headings *still* increment the counter. If you want "skip empty entirely," also hide the `.listicle[data-heading='']` via a separate rule.
-- **No intermediate wrapper between `.lincx-container` and `.listicle`** — `initGroupOffer()` relies on the direct-child relationship to reorder correctly.
+- **No intermediate wrapper between `.lincx-container` and `.listicle`** — `initGroupOffer(zone)` relies on the direct-child relationship within the zone's `.lincx-container` to reorder correctly. Each zone on a page needs its own parent element, holding no other zone: two zone snippets in one parent share a mount, and the first zone takes every offer.

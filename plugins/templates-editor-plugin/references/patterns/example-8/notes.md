@@ -4,7 +4,7 @@ Minimal placement: headline + body + a **list of CTAs** rendered from a pipe-spl
 
 ## What this example illustrates
 
-- **Pipe-split `cta_list` parsing** — the canonical `handleCtaListSplits()` helper, which:
+- **Pipe-split `cta_list` parsing** — the canonical `handleCtaListSplits(zone)` helper, which:
   1. Reads `data-element` on each rendered CTA.
   2. Splits on `|` into `[label, href, color?]`.
   3. Sets `textContent`, `href`, and optional color override per item.
@@ -26,6 +26,6 @@ Minimal placement: headline + body + a **list of CTAs** rendered from a pipe-spl
 
 ## Things to preserve when editing
 
-- Don't rewrite `handleCtaListSplits()` — it's the shared pattern. Variants should extend via new `data-*` attributes, not by forking the parser.
+- Don't rewrite `handleCtaListSplits(zone)` — it's the shared pattern. Variants should extend via new `data-*` attributes, not by forking the parser.
 - Keep `target="_blank"` and `data-lincx-cta` on every rendered anchor (see `anti-patterns.md` A4, A11). The helper doesn't set `target` — that's in the Mustache template.
 - When the CAG dictates pipe-split format (`"Label|URL"` vs `"Label|URL|color"`), don't assume a third segment; guard with `if (parts[2])`.

@@ -4,6 +4,8 @@ Canonical, copy-paste-ready patterns extracted from the existing Lincx ad templa
 
 > **Field names in the snippets below are illustrative.** They reflect what commonly appears across the library, but **every template has its own CAG** — the actual field names for the template you're working on come from `get_creative_asset_group(id=…)`, not from these snippets. The **structure, class names, Mustache forms (`{{ }}` vs `{{{ }}}` vs `{{# }}`), data attributes, and JS helpers** are what you should copy verbatim. The **field names** — `href`, `cta_text`, `offer_headline`, etc. — swap for whatever the CAG defines. See `CHECKLIST.md` §6.
 
+> **Scripts search their own zone, never the whole page.** lincx-core strips a template's inline `<script>`s from the markup and appends them to the zone's mount, the element that holds the zone tag. So each script reads `document.currentScript.parentElement` once, synchronously, inside its IIFE: in `DOMContentLoaded`, timer and observer callbacks `document.currentScript` is `null`, so the read throws there, and a top-level `const zone` throws when a page serves the template twice. Pass that `zone` to every helper and query only inside it; a page-wide query lets the first zone on the page take every other zone's offers. Each zone snippet needs its own parent element, holding no other zone, or one zone's queries reach another zone's offers. Write inline scripts as a bare `<script>`: lincx-core leaves an inline `<script>` that carries an attribute in the markup, where it never runs (a `data-lincx-hook="beforeLoad"` script aside).
+
 Organized by user intent:
 - "Build a listicle" → §1, §2, §3, §11, §12, §14
 - "Build a sticky offer bar" → §4, §8
@@ -64,8 +66,8 @@ The backbone of every template.
 Paired with JS that prepends the reverse index so the last item is #1:
 
 ```js
-function addNumberToHeadlines() {
-  const headlines = document.querySelectorAll('.subheading[data-content]:not([data-content=""])')
+function addNumberToHeadlines(zone) {
+  const headlines = zone.querySelectorAll('.subheading[data-content]:not([data-content=""])')
   const count = headlines.length
   headlines.forEach((headline, index) => {
     headline.innerHTML = `<span class="number">${count - index}.</span> ${headline.innerHTML}`
@@ -104,8 +106,8 @@ Allows ops to define multiple CTAs as a single pipe-delimited array.
 ```
 
 ```js
-function handleCtaListSplits() {
-  document.querySelectorAll('.listicle__list__cta a').forEach((cta, index) => {
+function handleCtaListSplits(zone) {
+  zone.querySelectorAll('.listicle__list__cta a').forEach((cta, index) => {
     const parts = (cta.dataset.element || '').split('|')
     cta.textContent = parts[0]
     cta.href = parts[1]
@@ -312,10 +314,10 @@ Shows a hardcoded default when `cta_text` is empty.
 ## 10. Group ordering for listicles
 
 ```js
-function initGroupOffer() {
+function initGroupOffer(zone) {
   const groupKeys = ['high']
-  const listicles = document.querySelectorAll('.listicle')
-  const container = document.querySelector('.lincx-container')
+  const listicles = zone.querySelectorAll('.listicle')
+  const container = zone.querySelector('.lincx-container')
   const tail = Array.from(listicles).slice(1)
 
   const grouped = tail.reduce((acc, l) => {
@@ -328,7 +330,7 @@ function initGroupOffer() {
   tail.forEach(l => l.remove())
   order.forEach(g => (grouped[g] || []).forEach(l => container.appendChild(l)))
 
-  document.querySelectorAll('.listicle').forEach((l, rank) => l.setAttribute('data-rank', rank))
+  zone.querySelectorAll('.listicle').forEach((l, rank) => l.setAttribute('data-rank', rank))
 }
 ```
 
@@ -347,8 +349,8 @@ function initGroupOffer() {
 ```
 
 ```js
-function setupLazyLoad() {
-  document.querySelectorAll('.lazy-load').forEach(el => {
+function setupLazyLoad(zone) {
+  zone.querySelectorAll('.lazy-load').forEach(el => {
     const observer = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return
@@ -382,8 +384,8 @@ function setupLazyLoad() {
 ## 12. Video autoplay resilience
 
 ```js
-function initVideoPlayback() {
-  document.querySelectorAll('.video-thumbnail').forEach(video => {
+function initVideoPlayback(zone) {
+  zone.querySelectorAll('.video-thumbnail').forEach(video => {
     const ensurePlaying = () => video.paused && video.play().catch(() => {})
     ensurePlaying()
     video.addEventListener('pause', ensurePlaying)
@@ -397,13 +399,13 @@ function initVideoPlayback() {
 ## 13. Date formatting
 
 ```js
-function renderCurrentDate(selector, daysBack = 0) {
+function renderCurrentDate(zone, selector, daysBack = 0) {
   const date = new Date()
   if (daysBack) date.setDate(date.getDate() - daysBack)
   const formatted = date.toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: '2-digit'
   })
-  document.querySelectorAll(selector).forEach(el => el.textContent = formatted)
+  zone.querySelectorAll(selector).forEach(el => el.textContent = formatted)
 }
 ```
 
@@ -422,16 +424,23 @@ Keep outside `{{#ads}}`. Reuse verbatim and edit the brand/domain line at the bo
     <br /><br />
     Trademarks utilized on our website belong to their respective owners...
     <br /><br />
-    © <span id="year"></span> <span id="location"></span>
+    © <span class="footer-year"></span> <span class="footer-location"></span>
   </p>
+  <script>
+    ;(() => {
+      const scope = document.currentScript.parentElement
+      const footer = scope.matches('.footer') ? scope : scope.querySelector('.footer')
+      if (!footer) return
+      const yearEl = footer.querySelector('.footer-year')
+      if (yearEl) yearEl.textContent = new Date().getFullYear()
+      const locEl = footer.querySelector('.footer-location')
+      if (locEl) locEl.textContent = window.location.hostname
+    })()
+  </script>
 </footer>
-<script>
-  var yearEl = document.getElementById('year');
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
-  var locEl = document.getElementById('location');
-  if (locEl) locEl.textContent = window.location.hostname;
-</script>
 ```
+
+The script finds its footer from its parent: the footer itself in place, else the `.footer` inside the zone's mount, where lincx-core appends it. Use classes, not ids: two zones on one page would repeat an id.
 
 ```css
 .footer {
