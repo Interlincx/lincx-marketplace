@@ -25,8 +25,8 @@
   </div>
   {{/ads}}
   <script>
-    function handleCtaListSplits() {
-      const ctaList = document.querySelectorAll('.actions .btn');
+    function handleCtaListSplits(zone) {
+      const ctaList = zone.querySelectorAll('.actions .btn');
       ctaList.forEach(function (cta, index) {
         cta.dataset.lincxCtaName = `cta_list ${index + 1}`;
         const splittedCTA = cta.dataset.element.split('|');
@@ -42,6 +42,9 @@
       });
     }
 
-    handleCtaListSplits();
+    (() => {
+      const zone = document.currentScript.parentElement;
+      handleCtaListSplits(zone);
+    })();
   </script>
 </div>

@@ -241,12 +241,23 @@ Templates live in production for months. A hardcoded `© 2024` date tells users 
 
 ✅ **Do:**
 ```html
-<p>© <span id="year"></span> BrandName</p>
-<script>
-  var yearEl = document.getElementById('year')
-  if (yearEl) yearEl.textContent = new Date().getFullYear()
-</script>
+<footer class="footer">
+  <p>© <span class="footer-year"></span> <span class="footer-location"></span></p>
+  <script>
+    ;(() => {
+      const scope = document.currentScript.parentElement
+      const footer = scope.matches('.footer') ? scope : scope.querySelector('.footer')
+      if (!footer) return
+      const yearEl = footer.querySelector('.footer-year')
+      if (yearEl) yearEl.textContent = new Date().getFullYear()
+      const locEl = footer.querySelector('.footer-location')
+      if (locEl) locEl.textContent = window.location.hostname
+    })()
+  </script>
+</footer>
 ```
+
+Classes and the zone's own footer, not ids, as `patterns.md` §14: two zones on one page would repeat an id.
 
 ---
 

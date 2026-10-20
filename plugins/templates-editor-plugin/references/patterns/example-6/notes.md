@@ -20,4 +20,4 @@ example-6 is the right choice when the CAG provides `videoSrc` and the brief spe
 ## Things to preserve when editing
 
 - Keep both `imageURL` and `src` hooked up — some CAGs populate one, some the other; the template tolerates both.
-- Don't inline the video autoplay logic per-element — use one `initVideoPlayback()` helper that iterates (see `patterns.md` §12).
+- Don't inline the video autoplay logic per-element — use one `initVideoPlayback(zone)` helper that iterates (see `patterns.md` §12).

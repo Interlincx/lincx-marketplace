@@ -117,21 +117,8 @@
   </div>
 
   <script>
-    if (
-      document.readyState === 'complete' ||
-      document.readyState === 'interactive'
-    ) {
-      // DOM is ready
-      console.log('DOM is ready!')
-      setupLazyLoad()
-    } else {
-      document.addEventListener('DOMContentLoaded', function () {
-        setupLazyLoad()
-      })
-    }
-
-    function setupLazyLoad() {
-      const lazyElements = document.querySelectorAll(
+    function setupLazyLoad(zone) {
+      const lazyElements = zone.querySelectorAll(
         '.listicle__thumbnail.lazy-load'
       )
       lazyElements.forEach((element) => {
@@ -170,8 +157,8 @@
       })
     }
 
-    function initVideoPlayback() {
-      const videos = document.querySelectorAll('.video-thumbnail')
+    function initVideoPlayback(zone) {
+      const videos = zone.querySelectorAll('.video-thumbnail')
 
       videos.forEach((video) => {
         // Function to ensure video keeps playing
@@ -201,10 +188,10 @@
       })
     }
 
-    function initGroupOffer() {
+    function initGroupOffer(zone) {
       const groupKeys = ['high']
-      const listicles = document.querySelectorAll('.listicle')
-      const container = document.querySelector('.lincx-container')
+      const listicles = zone.querySelectorAll('.listicle')
+      const container = zone.querySelector('.lincx-container')
       
       // Get all listicles except the first one
       const listiclesArray = Array.from(listicles).slice(1)
@@ -238,32 +225,44 @@
 
       // Attach data-rank to all listicles in the new order
       let rank = 1
-      const orderedListicles = document.querySelectorAll('.listicle')
+      const orderedListicles = zone.querySelectorAll('.listicle')
       orderedListicles.forEach(listicle => {
         listicle.setAttribute('data-rank', rank)
         rank++
       })
 
-      setupLazyLoad()
+      setupLazyLoad(zone)
     }
     ;(() => {
       
-      function renderCurrentDate(selector) {
+      function renderCurrentDate(zone, selector) {
         const date = new Date()
         const options = { year: 'numeric', month: 'long', day: '2-digit' }
         const formattedDate = date.toLocaleDateString('en-US', options)
 
-        const element = document.querySelector(selector)
+        const element = zone.querySelector(selector)
         if (element) {
           element.textContent = formattedDate
         } else {
           console.error(`Selector "${selector}" not found.`)
         }
       }
-      initGroupOffer()
+      // lincx-core appends inline scripts to the zone's mount, beside the markup.
+      const zone = document.currentScript.parentElement
+      if (
+        document.readyState === 'complete' ||
+        document.readyState === 'interactive'
+      ) {
+        setupLazyLoad(zone)
+      } else {
+        document.addEventListener('DOMContentLoaded', function () {
+          setupLazyLoad(zone)
+        })
+      }
+      initGroupOffer(zone)
       
-      renderCurrentDate('.listicle__published--date')
-      initVideoPlayback()
+      renderCurrentDate(zone, '.listicle__published--date')
+      initVideoPlayback(zone)
     })()
   </script>
 
@@ -335,7 +334,7 @@
     <br />
 
     <p>
-      © <span id="year"></span> <span id="location"></span> |
+      © <span class="footer-year"></span> <span class="footer-location"></span> |
       <a href="/privacy.html" style="color: grey">Privacy Policy</a> |
       <a href="/terms.html" style="color: grey">Terms of Use</a> |
       <a href="/disclosure.html" style="color: grey">Disclosure</a> |
@@ -354,8 +353,19 @@
 
       // Usage
       addShareThisScript()
-      document.getElementById('year').textContent = new Date().getFullYear()
-      document.getElementById('location').textContent = window.location.hostname
+      // Scope to this zone's footer (classes, not ids): in place the script's
+      // parent is the footer; lincx-core appends it to the zone's mount instead.
+      ;(() => {
+        const scope = document.currentScript.parentElement
+        const footer = scope.matches('.footer')
+          ? scope
+          : scope.querySelector('.footer')
+        if (!footer) return
+        footer.querySelector('.footer-year').textContent =
+          new Date().getFullYear()
+        footer.querySelector('.footer-location').textContent =
+          window.location.hostname
+      })()
     </script>
   </footer>
   <img
