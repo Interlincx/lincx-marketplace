@@ -1,0 +1,100 @@
+{
+  "source": "Interlincx/lincx-site-fit starters/offer-wall/v1/adapter.json @ fee4776",
+  "verified": false,
+  "wrapper": "listing-wrapper",
+  "cagFields": [
+    "src",
+    "logoURL",
+    "headline",
+    "subheadline",
+    "bullet_points",
+    "cta_text",
+    "cta_phone",
+    "banner"
+  ],
+  "tokens": {
+    "--ow-font": {
+      "from": "fontBody.family"
+    },
+    "--ow-cta-font": {
+      "from": "fontBody.family"
+    },
+    "--ow-bullet-line": {
+      "from": "fontBody.lineHeight"
+    },
+    "--ow-heading-font": {
+      "from": "fontHeading.family"
+    },
+    "--ow-heading-weight": {
+      "from": "fontHeading.weight"
+    },
+    "--ow-text": {
+      "from": "colorText",
+      "on": "--ow-card-bg"
+    },
+    "--ow-card-bg": {
+      "from": "colorBackground"
+    },
+    "--ow-heading-color": {
+      "from": "colorHeading",
+      "on": "--ow-card-bg"
+    },
+    "--ow-phone-text": {
+      "from": "colorLink",
+      "on": "--ow-card-bg"
+    },
+    "--ow-bullet-icon": {
+      "from": "colorAccent"
+    },
+    "--ow-cta-bg": {
+      "from": "cta.background"
+    },
+    "--ow-cta-hover-bg": {
+      "from": "cta.background",
+      "derive": "darken"
+    },
+    "--ow-phone-hover": {
+      "from": "cta.background",
+      "on": "--ow-card-bg"
+    },
+    "--ow-cta-text": {
+      "from": "cta.text",
+      "on": "--ow-cta-bg"
+    },
+    "--ow-cta-icon": {
+      "from": "cta.text",
+      "on": "--ow-cta-hover-bg"
+    },
+    "--ow-cta-radius": {
+      "from": "cta.radiusPx",
+      "unit": "px"
+    },
+    "--ow-cta-weight": {
+      "from": "cta.fontWeight"
+    },
+    "--ow-cta-transform": {
+      "from": "cta.textTransform"
+    },
+    "--ow-cta-padding-y": {
+      "from": "cta.paddingYPx",
+      "unit": "px"
+    },
+    "--ow-cta-padding-x": {
+      "from": "cta.paddingXPx",
+      "unit": "px"
+    },
+    "--ow-card-radius": {
+      "from": "radiusPx",
+      "unit": "px"
+    },
+    "--ow-max-width": {
+      "from": "contentMaxWidthPx",
+      "unit": "px"
+    }
+  },
+  "unmapped": [
+    "fontBody.sizePx",
+    "cta.label",
+    "spacingUnitPx"
+  ]
+}

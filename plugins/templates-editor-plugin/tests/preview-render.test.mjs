@@ -83,3 +83,17 @@ test('renderPreview returns ok:false when html source is missing', () => {
     assert.equal(result.reason, 'MISSING_HTML');
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
+
+test('hostBackground paints the publisher page behind a transparent widget; unset keeps the default look (#10)', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'lincx-host-'));
+  try {
+    const schema = JSON.parse(readFileSync(join(fixtures, 'cag-schema.json'), 'utf8'));
+    const args = { html: '<div>{{headline}}</div>', css: '', cagSchema: schema, mockAds: [] };
+    renderPreview({ ...args, previewPath: join(dir, 'a.html'), hostBackground: 'rgb(10, 20, 30)' });
+    const host = readFileSync(join(dir, 'a.html'), 'utf8');
+    assert.match(host, /body \{ margin: 0; padding: 16px; background: #0a141e; \}/);
+    assert.doesNotMatch(host, /background: white/);
+    renderPreview({ ...args, previewPath: join(dir, 'b.html'), hostBackground: 'not-a-colour' });
+    assert.match(readFileSync(join(dir, 'b.html'), 'utf8'), /background: #f4f4f4;[\s\S]*background: white/);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

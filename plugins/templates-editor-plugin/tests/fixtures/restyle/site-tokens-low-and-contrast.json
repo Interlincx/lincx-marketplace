@@ -1,0 +1,67 @@
+{
+  "fontBody": {
+    "family": "Source Sans 3",
+    "sizePx": 17,
+    "lineHeight": 1.6,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "fontHeading": {
+    "confidence": "low",
+    "source": "guess",
+    "family": "Gotham",
+    "weight": 700
+  },
+  "colorText": {
+    "value": "#222222",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorBackground": {
+    "value": "#fafaf5",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorHeading": {
+    "value": "#111111",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorLink": {
+    "value": "#0a58ca",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorAccent": {
+    "confidence": "missing",
+    "source": null,
+    "value": null
+  },
+  "cta": {
+    "confidence": "high",
+    "source": "recorded",
+    "background": "#f7e9a0",
+    "text": "#ffffff",
+    "radiusPx": 4,
+    "fontWeight": 600,
+    "textTransform": "none",
+    "paddingYPx": 10,
+    "paddingXPx": 16,
+    "label": "Go"
+  },
+  "radiusPx": {
+    "value": 8,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "spacingUnitPx": {
+    "value": 8,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "contentMaxWidthPx": {
+    "value": 1100,
+    "confidence": "high",
+    "source": "recorded"
+  }
+}

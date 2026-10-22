@@ -1,0 +1,48 @@
+{
+  "ads": [
+    {
+      "adId": "mock-1",
+      "href": "https://example.com",
+      "listicle_headline": "",
+      "offer_headline": "First Offer Headline Goes Here",
+      "offer_text": "<p>Body copy for the first offer. Compare options from <a href=\"https://example.com\" target=\"_blank\">several providers</a> in a few minutes:</p><ul><li>First supporting point</li><li>Second supporting point</li><li>Third supporting point</li></ul>",
+      "cta_text": "Get Started",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "author_name": "Staff Writer",
+      "src_author": "https://poweredbylincx.com/assets/img1.webp"
+    },
+    {
+      "adId": "mock-2",
+      "href": "https://example.com",
+      "listicle_headline": "",
+      "offer_headline": "Second Offer Headline Goes Here",
+      "offer_text": "<p>Body copy for the second offer. This paragraph shows how a plain block of text wraps within the offer card.</p>",
+      "cta_text": "See If You Qualify",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "author_name": "Staff Writer",
+      "src_author": "https://poweredbylincx.com/assets/img1.webp"
+    },
+    {
+      "adId": "mock-3",
+      "href": "https://example.com",
+      "listicle_headline": "",
+      "offer_headline": "Third Offer Headline Goes Here",
+      "offer_text": "<p>Body copy for the third offer. Explain the value in a sentence or two and <a href=\"https://example.com\" target=\"_blank\">link to the details</a>.</p>",
+      "cta_text": "Get Your Free Quote",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "author_name": "Staff Writer",
+      "src_author": "https://poweredbylincx.com/assets/img1.webp"
+    },
+    {
+      "adId": "mock-4",
+      "href": "https://example.com",
+      "listicle_headline": "",
+      "offer_headline": "Fourth Offer Headline Goes Here",
+      "offer_text": "<p>Body copy for the fourth offer. Placeholder text showing the stacked layout as more items are added.</p>",
+      "cta_text": "Learn More",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "author_name": "Staff Writer",
+      "src_author": "https://poweredbylincx.com/assets/img1.webp"
+    }
+  ]
+}

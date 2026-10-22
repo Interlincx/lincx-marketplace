@@ -1,0 +1,90 @@
+<div class="listing-wrapper">
+  {{#ads}}
+  <div id="{{ adId }}" class="listing-container" data-is-banner="{{ banner }}">
+    <a
+      href="{{ href }}"
+      class="listing-full-link"
+      data-lincx-cta
+      data-lincx-cta-name="full link"
+      data-lincx-cta-position="full link"
+    ></a>
+    <div class="listing-inner">
+      <div class="listing-logo">
+        <img src="{{ src }}" alt="{{ headline }}" />
+      </div>
+      <div class="listing-content">
+        <h3 class="listing-headline">{{ headline }}</h3>
+        <ul class="listing-bullet-points">
+          {{#bullet_points}}
+          <li>
+            <svg
+              stroke="1"
+              fill="currentColor"
+              stroke-width="1px"
+              viewBox="0 0 1024 1024"
+              height="13"
+              width="13"
+              xmlns="http://www.w3.org/2000/svg"
+              style="flex-shrink: 0"
+            >
+              <path
+                d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 0 0-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.8-6.3-12.8z"
+              ></path>
+            </svg>
+            {{.}}
+          </li>
+          {{/bullet_points}}
+        </ul>
+      </div>
+      <div class="listing-cta">
+        <a
+          href="{{ href }}"
+          class="listing-cta-link"
+          data-lincx-cta
+          data-lincx-cta-name="main"
+          data-lincx-cta-position="main"
+        >
+          {{{ cta_text }}}
+          <svg
+            stroke="currentColor"
+            fill="currentColor"
+            stroke-width="0"
+            viewBox="0 0 320 512"
+            font-size="1.12rem"
+            height="1em"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M285.476 272.971L91.132 467.314c-9.373 9.373-24.569 9.373-33.941 0l-22.667-22.667c-9.357-9.357-9.375-24.522-.04-33.901L188.505 256 34.484 101.255c-9.335-9.379-9.317-24.544.04-33.901l22.667-22.667c9.373-9.373 24.569-9.373 33.941 0L285.475 239.03c9.373 9.372 9.373 24.568.001 33.941z"
+            ></path>
+          </svg>
+        </a>
+        <a
+          href="{{ href }}"
+          class="listing-cta-phone"
+          data-content="{{ cta_phone }}"
+          data-lincx-cta
+          data-lincx-cta-name="phone"
+          data-lincx-cta-position="phone"
+        >
+          <svg
+            stroke="currentColor"
+            fill="currentColor"
+            stroke-width="0"
+            viewBox="0 0 512 512"
+            height="1em"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M497.39 361.8l-112-48a24 24 0 0 0-28 6.9l-49.6 60.6A370.66 370.66 0 0 1 130.6 204.11l60.6-49.6a23.94 23.94 0 0 0 6.9-28l-48-112A24.16 24.16 0 0 0 122.6.61l-104 24A24 24 0 0 0 0 48c0 256.5 207.9 464 464 464a24 24 0 0 0 23.4-18.6l24-104a24.29 24.29 0 0 0-14.01-27.6z"
+            ></path>
+          </svg>
+          {{ cta_phone }}
+        </a>
+      </div>
+    </div>
+  </div>
+  {{/ads}}
+</div>

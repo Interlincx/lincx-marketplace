@@ -56,8 +56,26 @@ for (const p of [
 ]) check(existsSync(join(pluginRoot, p)), `missing command: ${p}`);
 
 // skill
-for (const f of ['editing-lincx-templates/SKILL.md', 'lincx-template-playbook/SKILL.md', 'lincx-template-playbook/baselines.md', 'lincx-template-playbook/full-build.md']) {
+for (const f of ['editing-lincx-templates/SKILL.md', 'lincx-template-playbook/SKILL.md', 'lincx-template-playbook/baselines.md', 'lincx-template-playbook/full-build.md', 'lincx-template-playbook/site-tokens.md', 'lincx-template-playbook/adapters/offer-wall.json', 'lincx-template-playbook/adapters/listicle.json']) {
   check(existsSync(join(pluginRoot, 'skills', f)), `missing skill file: ${f}`);
+}
+
+// restyle scripts, and every adapter must point at the token block of a wrapper and name site tokens the schema knows
+for (const f of ['scripts/restyle.mjs', 'scripts/restyle-lib.mjs']) check(existsSync(join(pluginRoot, f)), `missing script: ${f}`);
+{
+  const { SITE_TOKEN_SCHEMA } = await import('./restyle-lib.mjs');
+  const known = new Set(Object.entries(SITE_TOKEN_SCHEMA).flatMap(([n, fs]) => Object.keys(fs).map((k) => (k === 'value' ? n : `${n}.${k}`))));
+  for (const t of ['offer-wall', 'listicle']) {
+    const p = join(pluginRoot, 'skills/lincx-template-playbook/adapters', `${t}.json`);
+    if (!existsSync(p)) continue;
+    const a = JSON.parse(readFileSync(p, 'utf8'));
+    check(typeof a.wrapper === 'string' && a.wrapper, `adapters/${t}.json: wrapper required`);
+    for (const [tok, def] of Object.entries(a.tokens ?? {})) {
+      check(known.has(def.from), `adapters/${t}.json: ${tok} reads unknown site token "${def.from}"`);
+      if (def.on) check(Object.hasOwn(a.tokens, def.on), `adapters/${t}.json: ${tok} is held against ${def.on}, which is not an adapter token`);
+    }
+    for (const u of a.unmapped ?? []) check(known.has(u), `adapters/${t}.json: unmapped "${u}" is not a site token`);
+  }
 }
 
 // hook
