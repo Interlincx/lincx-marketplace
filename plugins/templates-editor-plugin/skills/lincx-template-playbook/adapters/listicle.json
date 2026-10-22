@@ -1,0 +1,92 @@
+{
+  "source": "Interlincx/lincx-site-fit starters/listicle/v1/adapter.json @ fee4776",
+  "verified": false,
+  "wrapper": "lincx-wrapper",
+  "cagFields": [
+    "listicle_headline",
+    "offer_headline",
+    "author_name",
+    "src_author",
+    "src",
+    "videoSrc",
+    "offer_text",
+    "cta_text",
+    "cta_list"
+  ],
+  "tokens": {
+    "--lstcl-font": {
+      "from": "fontBody.family"
+    },
+    "--lstcl-body-size": {
+      "from": "fontBody.sizePx",
+      "unit": "px"
+    },
+    "--lstcl-body-line": {
+      "from": "fontBody.lineHeight"
+    },
+    "--lstcl-heading-font": {
+      "from": "fontHeading.family"
+    },
+    "--lstcl-h-weight": {
+      "from": "fontHeading.weight"
+    },
+    "--lstcl-text": {
+      "from": "colorText",
+      "on": "--lstcl-bg"
+    },
+    "--lstcl-footer-text": {
+      "from": "colorText",
+      "on": "--lstcl-bg"
+    },
+    "--lstcl-bg": {
+      "from": "colorBackground"
+    },
+    "--lstcl-heading-color": {
+      "from": "colorHeading",
+      "on": "--lstcl-bg"
+    },
+    "--lstcl-subheading-anchor": {
+      "from": "colorHeading",
+      "on": "--lstcl-bg"
+    },
+    "--lstcl-link": {
+      "from": "colorLink",
+      "on": "--lstcl-bg"
+    },
+    "--lstcl-cta-bg": {
+      "from": "cta.background"
+    },
+    "--lstcl-cta-text": {
+      "from": "cta.text",
+      "on": "--lstcl-cta-bg"
+    },
+    "--lstcl-cta-radius": {
+      "from": "cta.radiusPx",
+      "unit": "px"
+    },
+    "--lstcl-cta-weight": {
+      "from": "cta.fontWeight"
+    },
+    "--lstcl-cta-transform": {
+      "from": "cta.textTransform"
+    },
+    "--lstcl-cta-padding-y": {
+      "from": "cta.paddingYPx",
+      "unit": "px"
+    },
+    "--lstcl-cta-padding-x": {
+      "from": "cta.paddingXPx",
+      "unit": "px"
+    },
+    "--lstcl-listicle-gap": {
+      "from": "spacingUnitPx",
+      "unit": "px"
+    }
+  },
+  "unmapped": [
+    "colorAccent",
+    "cta.label",
+    "radiusPx",
+    "contentMaxWidthPx"
+  ]
+}

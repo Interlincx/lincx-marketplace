@@ -1,0 +1,44 @@
+{
+  "ads": [
+    {
+      "adId": "mock-1",
+      "href": "https://example.com/offer-1",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "headline": "Example Lender One: compare fixed-rate refinance offers",
+      "bullet_points": ["No-cost rate quote in minutes", "Fixed terms from 10 to 30 years", "Licensed in all 50 states"],
+      "cta_text": "Compare Rates",
+      "cta_phone": "(800) 555-0101",
+      "banner": false
+    },
+    {
+      "adId": "mock-2",
+      "href": "https://example.com/offer-2",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "headline": "Example Lender Two: cash-out refinance made simple",
+      "bullet_points": ["Tap your home equity", "Online application", "Closing support from start to finish"],
+      "cta_text": "Get Started",
+      "cta_phone": "(800) 555-0102",
+      "banner": false
+    },
+    {
+      "adId": "mock-3",
+      "href": "https://example.com/offer-3",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "headline": "Example Lender Three: first-time buyer programs",
+      "bullet_points": ["Low down payment options", "Pre-approval in one day", "Dedicated loan officer"],
+      "cta_text": "Check Eligibility",
+      "cta_phone": "(800) 555-0103",
+      "banner": false
+    },
+    {
+      "adId": "mock-4",
+      "href": "https://example.com/offer-4",
+      "src": "https://poweredbylincx.com/assets/img1.webp",
+      "headline": "Example Lender Four: rate-and-term refinance",
+      "bullet_points": ["Lower your monthly payment", "Shorten your loan term", "No application fee"],
+      "cta_text": "See My Rate",
+      "cta_phone": "(800) 555-0104",
+      "banner": false
+    }
+  ]
+}

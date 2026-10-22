@@ -1,0 +1,274 @@
+<div class="lincx-wrapper">
+  <div class="lincx-container">
+    {{#ads}}
+    <div
+      class="listicle"
+      data-heading="{{{listicle_headline}}}"
+      data-group="{{groupOffer}}"
+      id="{{ adId }}"
+    >
+      <h2 class="heading" data-content="{{{listicle_headline}}}">
+        {{{listicle_headline}}}
+      </h2>
+      <h3 class="subheading" data-content="{{{offer_headline}}}">
+        <a
+          href="{{href}}"
+          target="_blank"
+          style="text-decoration: none; color: var(--lstcl-subheading-anchor)"
+        >
+          {{{offer_headline}}}</a
+        >
+      </h3>
+      <div class="listicle__info" data-content="{{ author_name }}">
+        <img
+          loading="lazy"
+          src="{{ src_author }}"
+          alt="{{ src_author }}"
+          class="listicle__author--image"
+        />
+        <span class="listicle__author--name">{{ author_name }}</span>
+        <span class="listicle__published--date"></span>
+        <span class="listicle__category"><strong>Trending</strong></span>
+      </div>
+
+      <div class="listicle__thumbnail lazy-load" data-content="{{ src }}">
+        <a
+          href="{{href}}"
+          target="_blank"
+          data-lincx-cta
+          data-content="{{ cta_text }}"
+        >
+          <img
+            data-src="{{src}}"
+            alt="listicle image"
+            onerror="this.onerror=null; this.remove();"
+          />
+        </a>
+        <img
+          data-src="{{src}}"
+          alt="listicle image"
+          data-show="{{ cta_text }}"
+        />
+      </div>
+      <div class="listicle__thumbnail lazy-load" data-content="{{ videoSrc }}">
+        <a
+          href="{{href}}"
+          target="_blank"
+          data-lincx-cta
+          data-content="{{ cta_text }}"
+        >
+          <video
+            class="video-thumbnail"
+            muted
+            playsinline
+            loop
+            preload="metadata"
+            width="100%"
+            height="100%"
+            data-src="{{ videoSrc }}"
+          >
+            <source data-src="{{ videoSrc }}" type="video/mp4" />
+            <source data-src="{{ videoSrc }}" type="video/webm" />
+            Your browser does not support the video tag.
+          </video>
+          <button class="video-play-button" style="display: none">
+            Play Video
+          </button>
+        </a>
+        <video
+          class="video-thumbnail"
+          muted
+          playsinline
+          loop
+          preload="metadata"
+          width="100%"
+          height="100%"
+          data-show="{{ cta_text }}"
+          data-src="{{ videoSrc }}"
+        >
+          <source data-src="{{ videoSrc }}" type="video/mp4" />
+          <source data-src="{{ videoSrc }}" type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
+        <button class="video-play-button" style="display: none">
+          Play Video
+        </button>
+      </div>
+      <div class="listicle__content">{{{ offer_text }}}</div>
+
+      <div
+        class="listicle__list__cta"
+        data-content="{{#cta_list}}{{.}}{{/cta_list}}"
+      >
+        {{#cta_list}}
+        <a href="{{href}}" class="cta__link" target="_blank" data-lincx-cta
+          >{{.}}</a
+        >
+        {{/cta_list}}
+      </div>
+      <br />
+      <div class="listicle__cta" data-content="{{ cta_text }}">
+        <a href="{{href}}" class="cta__link" target="_blank" data-lincx-cta
+          >{{ cta_text }}</a
+        >
+      </div>
+    </div>
+    {{/ads}}
+  </div>
+
+  <script>
+    function setupLazyLoad(zone) {
+      const lazyElements = zone.querySelectorAll(
+        '.listicle__thumbnail.lazy-load'
+      )
+      lazyElements.forEach((element) => {
+        const lazyLoad = (entries, observer) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const parentElement = entry.target
+
+              const isVideo = parentElement.querySelector('video')
+              const mediaElement = isVideo
+                ? parentElement.querySelector('video')
+                : parentElement.querySelectorAll('img')
+
+              if (isVideo) {
+                if (!mediaElement.src) {
+                  mediaElement.src = mediaElement.dataset.src
+                  mediaElement.autoplay = true
+                  mediaElement.loop = true
+                  mediaElement.muted = true
+                  mediaElement.play()
+                }
+              } else {
+                mediaElement.forEach((img) => {
+                  if (!img.src) {
+                    img.src = img.dataset.src
+                  }
+                })
+              }
+
+              observer.unobserve(parentElement)
+            }
+          })
+        }
+        const observer = new IntersectionObserver(lazyLoad, { threshold: 0.3 })
+        observer.observe(element)
+      })
+    }
+
+    function initVideoPlayback(zone) {
+      const videos = zone.querySelectorAll('.video-thumbnail')
+
+      videos.forEach((video) => {
+        function ensurePlaying() {
+          if (video.paused) {
+            video.play().catch(() => {})
+          }
+        }
+
+        ensurePlaying()
+        video.addEventListener('pause', ensurePlaying)
+        video.addEventListener('ended', () => {
+          video.currentTime = 0
+          ensurePlaying()
+        })
+      })
+    }
+
+    function initGroupOffer(zone) {
+      const groupKeys = ['high']
+      const listicles = zone.querySelectorAll('.listicle')
+      const container = zone.querySelector('.lincx-container')
+
+      const listiclesArray = Array.from(listicles).slice(1)
+
+      const groupedListicles = listiclesArray.reduce((acc, listicle) => {
+        const group = listicle.dataset.group || 'default'
+        if (!acc[group]) {
+          acc[group] = []
+        }
+        acc[group].push(listicle)
+        return acc
+      }, {})
+
+      const orderedGroups = groupKeys.concat(
+        Object.keys(groupedListicles).filter((key) => !groupKeys.includes(key))
+      )
+
+      listiclesArray.forEach((listicle) => listicle.remove())
+
+      orderedGroups.forEach((group) => {
+        if (groupedListicles[group]) {
+          groupedListicles[group].forEach((listicle) => {
+            container.appendChild(listicle)
+          })
+        }
+      })
+
+      let rank = 1
+      const orderedListicles = zone.querySelectorAll('.listicle')
+      orderedListicles.forEach((listicle) => {
+        listicle.setAttribute('data-rank', rank)
+        rank++
+      })
+
+      setupLazyLoad(zone)
+    }
+    ;(() => {
+      function renderCurrentDate(zone, selector) {
+        const date = new Date()
+        const options = { year: 'numeric', month: 'long', day: '2-digit' }
+        const formattedDate = date.toLocaleDateString('en-US', options)
+
+        const element = zone.querySelector(selector)
+        if (element) {
+          element.textContent = formattedDate
+        }
+      }
+      // lincx-core appends inline scripts to the zone's mount, beside the markup.
+      const zone = document.currentScript.parentElement
+      if (
+        document.readyState === 'complete' ||
+        document.readyState === 'interactive'
+      ) {
+        setupLazyLoad(zone)
+      } else {
+        document.addEventListener('DOMContentLoaded', function () {
+          setupLazyLoad(zone)
+        })
+      }
+      initGroupOffer(zone)
+      renderCurrentDate(zone, '.listicle__published--date')
+      initVideoPlayback(zone)
+    })()
+  </script>
+
+  <footer class="footer">
+    <p>
+      ADVERTISING DISCLOSURE: This website and the products &amp; services
+      referred to on the site are advertising marketplaces. This website is an
+      advertisement and not a news publication.
+    </p>
+    <br />
+    <p>
+      &copy; <span class="footer-year"></span>
+      <span class="footer-location"></span>
+    </p>
+    <script>
+      // Scope to this zone's footer (classes, not ids): in place the script's
+      // parent is the footer; lincx-core appends it to the zone's mount instead.
+      ;(() => {
+        const scope = document.currentScript.parentElement
+        const footer = scope.matches('.footer')
+          ? scope
+          : scope.querySelector('.footer')
+        if (!footer) return
+        footer.querySelector('.footer-year').textContent =
+          new Date().getFullYear()
+        footer.querySelector('.footer-location').textContent =
+          window.location.hostname
+      })()
+    </script>
+  </footer>
+</div>
