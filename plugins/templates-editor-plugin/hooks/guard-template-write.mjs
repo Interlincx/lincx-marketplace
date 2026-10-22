@@ -10,12 +10,15 @@ import { fileURLToPath } from 'node:url';
 
 const root = process.env.CLAUDE_PLUGIN_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..');
 
-/** Template IDs (3rd column) of the rows in baselines.md. */
+/** Template IDs (the "Baseline template ID" column) of the rows in baselines.md. */
 export function baselineIds(md) {
   const ids = new Set();
+  let col = -1;
   for (const line of md.split('\n')) {
     const cells = line.split('|').slice(1, -1).map((c) => c.trim());
-    if (cells.length >= 4 && /^[a-z0-9]{4,}$/i.test(cells[2]) && !/^-+$/.test(cells[2]) && cells[2] !== 'Baseline template ID') ids.add(cells[2]);
+    const header = cells.indexOf('Baseline template ID');
+    if (header !== -1) { col = header; continue; }
+    if (col !== -1 && cells.length > col && /^[a-z0-9]{4,}$/i.test(cells[col]) && !/^-+$/.test(cells[col])) ids.add(cells[col]);
   }
   return ids;
 }
