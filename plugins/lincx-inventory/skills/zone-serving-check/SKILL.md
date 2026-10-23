@@ -120,7 +120,12 @@ Work in this order and stop as soon as one step explains it.
      candidate also names its `segmentName` and `templateId`). Name the visits it
      serves on, then check whether a debug call (Rule 2) can meet them before
      step 5.
-   - **`eligible`** — config is fine; the cause is runtime — continue. If
+   - **`eligible`** — the group's config is fine; the cause is runtime, or the
+     ads' own rules — continue. Eligible covers the group's rules only; each ad
+     is judged on its own, so a group whose ads are all geo-only stays eligible.
+     Check the ads with `explain_serve` per `adId` (its conditions only, not
+     whether the ad is live — check `enabled` with `get_ad`), or the group's
+     `offers.live` / `offers.conditionalAds` in `get_zone_eligible_ad_groups`. If
      `matchedKeys[]` has an entry with `source: 'zone-default'` or `'segment'`,
      it holds only while the visit leaves that key alone — say so.
 
@@ -189,10 +194,24 @@ Never report a count delta between the two tools as a finding. If you want to
 reconcile, do it per-offer through the flow above.
 
 Its `fully_live` also ignores a group's rules beyond `zoneId` (and a CAG
-mismatch), so its live count can exceed `get_zone_eligible_ad_groups`'
+mismatch), and counts an ad that serves only some visits (e.g. geo-only) as live,
+so its live count can exceed `get_zone_eligible_ad_groups`'
 `directlyTargetedLive` on the same zone, by design. The gap is the targeted
-groups that tool reports as `excluded` or `conditional`. Eligible is not serving
-either: step 4's runtime filters still apply.
+groups reading `fully_live: true` that tool reports as `excluded` or
+`conditional`, plus those in `directlyTargetedLiveOnConditionalAds` — eligible
+groups whose live ads all depend on the visit (e.g. every ad geo-only); for those,
+the row's `offers.conditionalAds` lists up to 10 of its visit-dependent ads with
+their conditions, live or not, so check an ad's state before naming it as the one
+that serves. When `offers.conditional` exceeds the list's length the list may be
+cut, or may skip offers that are conditional only through the group's own rules
+(no ad-level conditions), so the live ad may not be in it — read the group's ads
+with `list_ads` / `get_ad`.
+
+The count can also include a group whose conditional ads together cover
+every visit (one mobile-only, one never-mobile), so do not report its groups as
+serving only some visits without reading their ads.
+
+Eligible is not serving either: step 4's runtime filters still apply.
 
 ## Rule 5 — do not infer a cap from the count
 
