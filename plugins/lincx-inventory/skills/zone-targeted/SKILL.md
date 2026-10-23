@@ -54,11 +54,16 @@ Every MCP business tool requires `network_id`. There is no active network, and `
      `zone.servesOnlyPinnedVisits`), the zone serves only some visits — repeat it
      above the table.
 3. Say what **fully live** does not cover: it ignores the group's own rules beyond
-   `zoneId` (template, device, geo, daypart, custom keys) and a CAG mismatch, so a
+   `zoneId` (template, device, geo, daypart, custom keys) and a CAG mismatch, and
+   it counts a live ad that depends on the visit (e.g. geo-only) as live, so a
    fully-live group can still never serve here, or serve only on some visits. When
    the question is whether a group actually serves, use `get_zone_eligible_ad_groups`
-   (each row's `verdict`; `directlyTargetedLive` counts eligible groups only, so it
-   can be lower than this table's live count) or `explain_serve` for one group.
+   (each row's `verdict`; `directlyTargetedLive` counts eligible groups with a live
+   ad that serves every visit keeping the zone's defaults, so it can be lower than
+   this table's live count — eligible groups live only on conditional ads are
+   counted in `directlyTargetedLiveOnConditionalAds`, and
+   `freeRadicalHostsLiveOnConditionalAds` for free-radical hosts) or
+   `explain_serve` for one group (per `adId` for its ads' own rules).
 
 ## Guardrails
 - Pass `network_id` on every call (see Network), and name it in the answer.
