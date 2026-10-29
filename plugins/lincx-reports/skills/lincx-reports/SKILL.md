@@ -5,7 +5,7 @@ description: Use when the user asks for Lincx reports — campaign performance, 
 
 # Lincx Reports — router
 
-You handle Lincx reporting requests by dispatching to the right sub-skill. Three reports are supported.
+You handle Lincx reporting requests by dispatching to the right sub-skill. Three reports are supported, plus a builder for the reports themselves.
 
 ## Decision table
 
@@ -14,6 +14,7 @@ You handle Lincx reporting requests by dispatching to the right sub-skill. Three
 | "How did campaign X perform?", "show me campaign Y last month", spend / clicks / conversions on a named campaign | `lincx-campaign-performance` |
 | "Revenue by advertiser / network / site", fill rate, RPM totals for a period | `lincx-revenue-summary` |
 | Top / bottom creatives / zones / sites; "what dropped this week"; week-over-week or day-over-day comparisons | `lincx-creative-anomalies` |
+| The question needs dimensions no report has, or "create a report with…", "add `hour` to that report" | `lincx-report-builder` |
 
 If the request blends two reports ("revenue and top creatives this week"), run them sequentially as two separate reports — do not merge.
 
@@ -34,3 +35,4 @@ Every MCP business tool takes a `network_id` — there is no active network. Tak
 - Combine data across networks (each MCP call is scoped to one `network_id`).
 - Speculate on causes when the data does not show them.
 - Run `report_query` before the dimension check in `_shared/dimension-discovery.md` passes, or answer from a report that lacks a dimension the question needs.
+- Create or extend a report yourself. That goes through `lincx-report-builder` only.

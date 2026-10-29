@@ -16,12 +16,12 @@
 4. (no tool) — Claude stops and asks: `Zones Daily` has no `hour`, so Denver days can't be computed from it; `Zones Hourly` carries zone, date, hour — use that one?
 5. After the user agrees: `report_query({ network_id, dimensionSetId: "<Zones Hourly id>", startDate: "2026-09-01", endDate: "2026-09-09", groupBy: ["date"], filter: { zone: "NewSeniorDeals.com" }, timezone: "America/Denver" })`.
 
-**Variant — no report covers it:** if `Zones Hourly` didn't exist, step 4 names the missing `hour`, names `Zones Daily` as the closest report, says to add `hour` to it in Reports Center, and offers UTC days as an explicit alternative. No `report_query` until the user picks.
+**Variant — no report covers it:** if `Zones Hourly` didn't exist, step 4 names the missing `hour`, hands off to `lincx-report-builder` (see `report-builder.md`), and offers UTC days from `Zones Daily` as an explicit alternative. No `report_query` and no write until the user picks.
 
 **Reviewer checklist:**
 
 - [ ] `report_query` was NOT called against `Zones Daily` with `timezone`.
 - [ ] The missing dimension (`hour`) and the covering report were both named.
 - [ ] `timezone` was not silently dropped to make `Zones Daily` fit.
-- [ ] No offer to create or edit a report (the MCP is read-only).
+- [ ] No write tool was called from this flow. A create or add is offered only through `lincx-report-builder`, after its review of every set.
 - [ ] If the server returned `Error: dimension set … is missing [hour]`, Claude went back to the suggestion step instead of retrying.
