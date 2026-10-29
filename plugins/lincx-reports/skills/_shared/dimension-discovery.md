@@ -2,7 +2,7 @@
 
 A dimension set (a custom report in Reports Center) decides which dimensions exist for the answer. Reports Center caps how many dimensions one report can carry, so a network usually has many overlapping reports and none of them is complete. Picking one without checking it against the question produces answers that look fine and are wrong — e.g. a `timezone` on a report without `hour` used to shift every date by a day.
 
-This check is a **gate**. Do not call `report_query` until it passes.
+This check is a **gate**. Do not call `report_query` until it passes. When no report passes, the way forward is `lincx-report-builder`, not a partial answer.
 
 ## Step 1 — Derive the required dimensions from the request
 
@@ -36,11 +36,11 @@ For each set, **missing = required − set.dimensions**.
   > `Zones Daily` (ab12cd-ef34gh) has no `hour`, so Denver days can't be computed from it. These carry everything you asked for (zone, date, hour): `Zones Hourly` (ab12cd-ij56kl). Use that one?
 
   Several full matches → prefer the one with the fewest extra dimensions (fewer, smaller rows); list up to 3 and ask if it isn't clear-cut.
-- **No report covers everything** → do not run a partial answer. Say which dimensions are missing, name the closest report (fewest missing) and what to add to it:
+- **No report covers everything** → do not run a partial answer. Say which dimensions are missing and hand off to `lincx-report-builder`: it reviews every report, recommends creating a new one with exactly the dimensions you need, and writes only after explicit confirmation. Offer the explicit alternative alongside:
 
-  > No report on this network has both `geoRegion` and `hour`. Closest is `Geo Daily` (ab12cd-mn78op), missing `hour` — add `hour` to it in Reports Center and I can run this. Or I can answer in UTC days from `Geo Daily` now.
+  > No report on this network has both `geoRegion` and `hour`. I can create one with them (you confirm the name and dimensions first), or answer in UTC days from `Geo Daily` now.
 
-  The MCP is read-only — never offer to create or edit the report yourself.
+  Never write a report from this file's flow; the builder's checklist is the only path to a write.
 
 Never silently drop a required dimension (e.g. quietly switch to UTC, or remove a breakdown) to make a report fit. Offering it as an explicit alternative, like above, is fine.
 

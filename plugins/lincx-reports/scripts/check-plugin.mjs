@@ -25,6 +25,8 @@ for (const skill of [
   'skills/lincx-campaign-performance/SKILL.md',
   'skills/lincx-revenue-summary/SKILL.md',
   'skills/lincx-creative-anomalies/SKILL.md',
+  'skills/lincx-report-builder/SKILL.md',
+  'skills/lincx-report-builder/references/decision-table.md',
 ]) check(existsSync(join(pluginRoot, skill)), `missing skill: ${skill}`);
 
 // expected shared helpers

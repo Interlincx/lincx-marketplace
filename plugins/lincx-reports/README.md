@@ -1,10 +1,14 @@
 # lincx-reports
 
-Manager-friendly reports over the Lincx MCP. Read-only. Three reports:
+Manager-friendly reports over the Lincx MCP. Read-only, except the report builder (below), which writes only after explicit confirmation. Three reports:
 
 - **Campaign performance** — spend, impressions, clicks, conversions for one or many campaigns over a date range.
 - **Revenue summary** — revenue, fill rate, RPM by advertiser / network / site for a period.
 - **Creative anomalies** — top/bottom creatives, zones, sites, templates, plus DoD/WoW drops with volume floor.
+
+Plus a builder for the reports themselves:
+
+- **Report builder** — when a question needs dimensions no report has, or you ask to create or extend a report. It reviews every report on the network first, recommends creating a new one by default, and adds to an existing one only when asked. Needs the `create_dimension_set` and `add_dimensions_to_set` MCP tools (lincx-mcp #110, #111); until they ship it can still review and recommend, but a write will fail.
 
 A router skill (`lincx-reports`) detects the intent and loads the matching sub-skill.
 

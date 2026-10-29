@@ -50,6 +50,8 @@
     "get_template_preview_bundle": "Not registered by lincx-mcp at all — planned in docs/superpowers/plans/2026-05-08-deterministic-template-preview.md, never shipped there. See issue #8.",
     "save_template_version": "Not registered by lincx-mcp; a write tool, against the server's read-only convention. The plugin already guards on its availability. See issue #8.",
     "create_template": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22.",
-    "update_template_content": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22."
+    "update_template_content": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22.",
+    "create_dimension_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#110, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35.",
+    "add_dimensions_to_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#111, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35."
   }
 }

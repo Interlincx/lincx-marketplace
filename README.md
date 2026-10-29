@@ -7,7 +7,7 @@ A [Claude Code](https://claude.com/claude-code) plugin marketplace for Lincx. In
 | Plugin | What it does |
 |---|---|
 | **`templates-editor-plugin`** *(unlisted, see below)* | Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code. Pulls templates via the Lincx MCP, gives you a live preview loop, and ships a save path that paste-drops a versioned artifact today and will push via a Lincx write tool once one lands. Ships with a reference library (production checklist, pattern snippets, anti-patterns, and 8 canonical example templates) that guides the LLM to write on-pattern code. |
-| **`lincx-reports`** | Manager-friendly reports over the Lincx MCP — campaign performance, revenue summary, creative anomalies. Read-only, with a fixed four-part output contract so every answer is auditable. |
+| **`lincx-reports`** | Manager-friendly reports over the Lincx MCP — campaign performance, revenue summary, creative anomalies, plus a report builder that creates or extends a report only after you confirm. Otherwise read-only, with a fixed four-part output contract so every answer is auditable. |
 | **`lincx-inventory`** | Inventory queries over Lincx config — exhaustive zone-targeting rollups with a live/off breakdown per ad group, plus a geo- and time-aware zone serving check that explains why an offer is or isn't in the `get_zone_ads` debug pool. |
 | **`lincx-analysis`** | Zone tier analysis. The platform's deterministic engine computes the tiers, ranks and risk flags; Claude writes the rationale, justifications and next actions on top. Skips the server-side LLM pass entirely, so the analysis prompt is a markdown file you can edit instead of a deploy. |
 
