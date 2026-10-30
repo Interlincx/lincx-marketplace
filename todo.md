@@ -33,18 +33,11 @@ From the plan (see `docs/superpowers/plans/2026-04-22-templates-editor-plugin.md
 Run `plugins/templates-editor-plugin/tests/smoke.md` top to bottom:
 
 1. `cd` into a scratch project dir, start Claude Code, confirm `/mcp` shows the Lincx MCP connected.
-2. `/lincx-template-edit <knownTemplateId>` → pick paths → confirm files appear, session state created, preview opens in browser.
+2. `/lincx-template-new test-banner` → pick a CAG and paths → confirm files appear, session state created, preview opens with synthesized ads, and the consult-references rule kicks in.
 3. Edit the CSS → confirm `preview.html` updates within ~2 s.
 4. `/lincx-template-load-ads <knownZoneId>` → confirm preview renders real ad content.
-5. `/lincx-template-save` → confirm `ads/versions/v1.html` exists and is self-contained.
-6. Edit again, save again → confirm `v2.html` appears with a diff summary.
-7. `/lincx-template-preview-toggle` → edit → confirm preview does NOT regenerate. Toggle back on → regenerates.
-8. Check `./.lincx-session.log` for clean hook/renderer messages.
-
-### From-scratch path
-1. `/lincx-template-new test-banner` → pick a CAG → author a simple banner.
-2. Confirm consult-references rule kicks in (skill reads `references/` visibly).
-3. Preview renders with synthesized ads.
+5. `/lincx-template-preview-toggle` → edit → confirm preview does NOT regenerate. Toggle back on → regenerates.
+6. Check `./.lincx-session.log` for clean hook/renderer messages.
 
 ### Failure-path spot checks
 - Corrupt `.lincx-session.json` → skill offers archive + fresh start.

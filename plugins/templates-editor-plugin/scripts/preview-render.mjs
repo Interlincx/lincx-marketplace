@@ -117,7 +117,7 @@ export async function cli(argv, cwd = process.cwd()) {
     const css = existsSync(entry.cssPath) ? readFileSync(entry.cssPath, 'utf8') : '';
 
     if (!entry.cagSchema) {
-      log('cagSchema missing from cache; run /lincx-template-refresh-schema');
+      log('cagSchema missing from cache; start a new session with /lincx-template-new');
       return 0;
     }
 
