@@ -1,0 +1,58 @@
+{
+  "fieldsOrder": [
+    "listicle_headline",
+    "offer_headline",
+    "author_name",
+    "src_author",
+    "src",
+    "videoSrc",
+    "offer_text",
+    "cta_text",
+    "cta_list"
+  ],
+  "fields": {
+    "properties": {
+      "listicle_headline": {
+        "type": "string",
+        "description": "Top-of-page listicle headline (shown only on the first ad with a value)"
+      },
+      "offer_headline": {
+        "type": "string",
+        "description": "Numbered offer-level headline shown above the thumbnail"
+      },
+      "author_name": {
+        "type": "string",
+        "description": "Author byline displayed next to the avatar"
+      },
+      "src_author": {
+        "type": "image",
+        "description": "Author avatar image URL"
+      },
+      "src": {
+        "type": "image",
+        "description": "Main offer image (lazy-loaded)"
+      },
+      "videoSrc": {
+        "type": "string",
+        "description": "Offer video URL, lazy-loaded \u2014 takes over the thumbnail slot when set"
+      },
+      "offer_text": {
+        "type": "string",
+        "description": "Body copy for the offer (HTML allowed)"
+      },
+      "cta_text": {
+        "type": "string",
+        "description": "Primary call-to-action label"
+      },
+      "cta_list": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Optional list of inline CTA links rendered above the primary CTA"
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  }
+}

@@ -12,6 +12,7 @@
     "cta_phone",
     "banner"
   ],
+  "cagOptional": ["logoURL", "subheadline"],
   "tokens": {
     "--ow-font": {
       "from": "fontBody.family"

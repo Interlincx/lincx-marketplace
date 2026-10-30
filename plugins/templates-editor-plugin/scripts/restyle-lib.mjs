@@ -506,3 +506,30 @@ export function planSave({ existing, desired }) {
   }
   return t.css === desired.css ? { action: 'none', id: t.id } : { action: 'patch', id: t.id };
 }
+
+/** A CAG's fields as [{ name, type, items? }] in field order, from the CAG shape ({ fieldsOrder, fields: { properties } }) or a { fields: [{ name, type }] } session schema. Throws on any other shape instead of reporting every field missing. */
+function cagFields(cag) {
+  if (Array.isArray(cag?.fields)) return cag.fields.map((f) => ({ name: f.name, type: f.type, ...(f.items && { items: f.items }) }));
+  const props = cag?.fields?.properties;
+  if (!props || typeof props !== 'object') throw new Error('not a CAG: expected { fieldsOrder, fields: { properties } } or { fields: [{ name, type }] }');
+  const names = [...new Set([...(cag.fieldsOrder ?? []), ...Object.keys(props)])].filter((n) => props[n]);
+  return names.map((name) => ({ name, type: props[name].type, ...(props[name].items && { items: props[name].items }) }));
+}
+
+const typeSignature = (f) => (f.items?.type ? `${f.type}<${f.items.type}>` : f.type);
+
+/** The session entry's `cagSchema` for a bundled cag.json, so no get_creative_asset_group call is needed. Fields named in `optional` carry `required: false`, so a mock ad may leave them out. */
+export function cagSessionSchema(cag, optional = []) {
+  return { fields: cagFields(cag).map((f) => ({ ...f, ...(optional.includes(f.name) && { required: false }) })) };
+}
+
+/** What a client's CAG lacks, adds or types differently compared with the baseline's cag.json. Only a missing or retyped field the template needs fails; `optional` fields may be absent, extra fields are harmless. Types compare with the array item type (array<string> is not array<object>). */
+export function cagDiff(baselineCag, clientCag, optional = []) {
+  const want = cagFields(baselineCag);
+  const have = new Map(cagFields(clientCag).map((f) => [f.name, f]));
+  const missing = want.filter((f) => !have.has(f.name) && !optional.includes(f.name)).map((f) => f.name);
+  const missingOptional = want.filter((f) => !have.has(f.name) && optional.includes(f.name)).map((f) => f.name);
+  const retyped = want.filter((f) => have.has(f.name) && typeSignature(have.get(f.name)) !== typeSignature(f)).map((f) => ({ name: f.name, baseline: typeSignature(f), client: typeSignature(have.get(f.name)) }));
+  const extra = [...have.keys()].filter((n) => !want.some((f) => f.name === n));
+  return { ok: missing.length === 0 && retyped.length === 0, missing, missingOptional, retyped, extra };
+}
