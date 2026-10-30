@@ -1,6 +1,6 @@
 ---
 name: editing-lincx-templates
-description: Build and adjust Lincx ad templates (HTML+CSS). Use when the user asks to create, modify, preview, or save a Lincx template, or when a slash command in the `/lincx-template-*` family is invoked.
+description: Build and adjust Lincx ad templates (HTML+CSS). Use when the user asks to create, modify, or preview a Lincx template, or when a slash command in the `/lincx-template-*` family is invoked.
 ---
 
 # Editing Lincx Templates
@@ -11,7 +11,7 @@ You help users author and adjust Lincx ad creative templates (HTML + CSS) bound 
 
 **Two sources of truth, split by role:**
 - **The references under `${CLAUDE_PLUGIN_ROOT}/references/`** are the authority for **structure, conventions, class names, Mustache forms, data attributes, JS helpers, and required legal/tracking markup**.
-- **The CAG (`creativeAssetGroup`) for the specific template you're working on** is the authority for **which fields exist, their types, and their spelling**. The CAG is loaded per session via `get_creative_asset_group(id=…)` in flows A/B below, and cached in session state as `cagSchema`.
+- **The CAG (`creativeAssetGroup`) for the specific template you're working on** is the authority for **which fields exist, their types, and their spelling**. The CAG is loaded per session via `get_creative_asset_group(id=…)` in Flow A below, and cached in session state as `cagSchema`.
 
 Never confuse the two. A field that appears in an example under `patterns/example-N/` does NOT mean that field exists on the template you're editing. Every CAG is its own contract.
 
@@ -67,20 +67,7 @@ Use `${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs` (`readSessionState`, `writ
 
 ## Flows
 
-### Flow A — Adjust an existing template (from `/lincx-template-edit <id>`)
-
-1. `auth_status` — if unauthenticated, tell the user to run `auth_login` and stop.
-2. Ask the user where to place the files (prompt for `htmlPath` and `cssPath` under their current project). Do not default silently.
-3. `get_template_preview_bundle(templateId=<id>)`. Surface any error inline; do not mutate session state on error.
-4. Persist the returned bundle to `./.lincx-session.bundle.json` (caller-local, gitignored).
-5. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/resolve-zone-and-ads.mjs ./.lincx-session.bundle.json <entryId> <htmlPath> <cssPath> <projectRoot>`. The script writes html/css to disk and prints a session-state patch on stdout.
-6. Merge the patch into `.lincx-session.json` via `upsertEntry`. Set `dirty:false`, `previewOpened:false`. Delete `./.lincx-session.bundle.json`.
-7. If `mockAdsSource.warnings` is non-empty, print each warning to the user once.
-8. Dispatch the renderer: `node ${CLAUDE_PLUGIN_ROOT}/scripts/preview-render.mjs <entryId>`. The browser opens.
-9. Converse with the user. Apply the consult-references rule before authoring edits. Every Edit/Write triggers the hook, which re-renders silently using the cached `mockAds`. Mark `dirty:true` after any write.
-10. On `/lincx-template-save` → Flow C.
-
-### Flow B — Build from scratch (from `/lincx-template-new <name>`)
+### Flow A — Build from scratch (from `/lincx-template-new <name>`)
 
 1. `auth_status`.
 2. `list_creative_asset_groups` → ask the user to pick a CAG. Record `creativeAssetGroupId`.
@@ -88,52 +75,26 @@ Use `${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs` (`readSessionState`, `writ
 4. `get_creative_asset_group(id=<chosen>)` → cache `cagSchema`.
 5. Upsert entry with `templateId:null`.
 6. Consult references per the mandatory rule, ask a few shaping questions (layout family, purpose, constraints), then author initial HTML/CSS. Mark `dirty:true`.
-7. Same live-preview loop as Flow A; same save path.
+7. Live-preview loop: every Edit/Write re-renders silently using the cached `mockAds`.
 
-### Flow C — Save (from `/lincx-template-save`)
-
-1. Read `.lincx-session.json`.
-2. For each entry with `dirty:true`:
-   - Determine if `save_template_version` is available in this session's tools.
-   - If yes and `templateId != null`: import `saveAsync` from `${CLAUDE_PLUGIN_ROOT}/scripts/save-seam.mjs`; wrap the MCP call in a `mcpWrite` function you pass in:
-     ```
-     async function mcpWrite({ templateId, html, css }) {
-       // Call the MCP tool with these params; return { version }.
-     }
-     ```
-     Call `saveAsync(entry, { mcpWriteAvailable: true, mcpWrite })`.
-   - Else: import `save` and call `save(entry, { mcpWriteAvailable: false })`.
-3. Clear `dirty`; if mode was `mcp`, update `version` from the result.
-4. Print artifact path (local) or new version number (mcp), plus the diff summary.
-
-### Flow D — Load ads (from `/lincx-template-load-ads <zoneId>`)
+### Flow B — Load ads (from `/lincx-template-load-ads <zoneId>`)
 
 1. Identify the target entry (ask if > 1 active).
 2. `get_zone_ads(id=<zoneId>)`.
 3. Update entry: `mockAds: <returned>`, `mockAdsSource: { kind:"zone", zoneId }`.
 4. Dispatch renderer so preview refreshes.
 
-### Flow E — Preview toggle (from `/lincx-template-preview-toggle`)
+### Flow C — Preview toggle (from `/lincx-template-preview-toggle`)
 
 1. Flip `previewDisabled` in session state.
 2. Report new state.
 
-### Flow F — Refresh schema (from `/lincx-template-refresh-schema`)
-
-1. For each entry whose `mockAdsSource.kind` is `zone-resolved` or `synthesized-fallback`:
-   - `get_template_preview_bundle(templateId=entry.templateId)`.
-   - Run the resolver script as in Flow A step 5; merge the resulting patch.
-   - Print any `warnings`.
-2. For entries whose `kind` is `zone` (manual override) or `synthesized` (Flow B), only re-fetch the CAG via `get_creative_asset_group(id=entry.creativeAssetGroupId)` and replace `cagSchema`. Leave `mockAds` and `mockAdsSource` unchanged.
-3. Dispatch `preview-render.mjs` for each affected entry.
-
 ## Never do
 
 - Never render or open browsers yourself. The renderer does that.
-- Never write to `versions/` yourself. The save seam does that.
 - Never invent pattern conventions. The references are the source of truth.
 - Never silently default path choices. Ask the user.
-- Never push to Lincx via any route other than `save_template_version` (when the tool exists). No HTTP calls, no CLI shell-outs.
+- Never push to Lincx unless the user asked for a direct write. Writes go through the registered MCP template tools (the write guard asks first). No HTTP calls, no CLI shell-outs.
 
 ## On failure
 

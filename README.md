@@ -6,7 +6,7 @@ A [Claude Code](https://claude.com/claude-code) plugin marketplace for Lincx. In
 
 | Plugin | What it does |
 |---|---|
-| **`templates-editor-plugin`** *(unlisted, see below)* | Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code. Pulls templates via the Lincx MCP, gives you a live preview loop, and ships a save path that paste-drops a versioned artifact today and will push via a Lincx write tool once one lands. Ships with a reference library (production checklist, pattern snippets, anti-patterns, and 8 canonical example templates) that guides the LLM to write on-pattern code. |
+| **`templates-editor-plugin`** | Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code. Starts from bundled baselines restyled to the publisher's site, and gives you a live preview loop. Ships with a reference library (production checklist, pattern snippets, anti-patterns, and 8 canonical example templates) that guides the LLM to write on-pattern code. |
 | **`lincx-reports`** | Manager-friendly reports over the Lincx MCP — campaign performance, revenue summary, creative anomalies. Read-only, with a fixed four-part output contract so every answer is auditable. |
 | **`lincx-inventory`** | Inventory queries over Lincx config — exhaustive zone-targeting rollups with a live/off breakdown per ad group, plus a geo- and time-aware zone serving check that explains why an offer is or isn't in the `get_zone_ads` debug pool. |
 | **`lincx-analysis`** | Zone tier analysis. The platform's deterministic engine computes the tiers, ranks and risk flags; Claude writes the rationale, justifications and next actions on top. Skips the server-side LLM pass entirely, so the analysis prompt is a markdown file you can edit instead of a deploy. |
@@ -201,36 +201,27 @@ To watch without polling the manifest, the release feed is `https://github.com/I
 Limits outside Claude Code:
 - Slash commands (`/zone-targeted`, `/zone-serving-check`) and hooks aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
 - `lincx-reports` is a router over three sibling skills, so install all four together.
-- The template editor (`editing-lincx-templates`) is not built until its MCP tools ship, see below.
 
 ---
 
 ## Using `templates-editor-plugin`
 
-> **Unlisted until its MCP tools ship (#13).** The plugin depends on `get_template_preview_bundle` and `save_template_version`, which the Lincx MCP doesn't expose yet. So loading a template for preview and saving back to Lincx don't work. It is removed from `.claude-plugin/marketplace.json`, so `/plugin install` can't find it, and from the portable build. The code stays in `plugins/templates-editor-plugin/`. Devs can still try it with the symlink flow (Option B, pointing at `plugins/templates-editor-plugin`). Re-list it by adding its entry back to `marketplace.json` once the tools are live.
->
-> If you already installed it, remove it: `/plugin uninstall templates-editor-plugin@lincx-marketplace`, then `/reload-plugins`. Once the marketplace refreshes, `/plugin update` can't find the plugin, so the broken install would otherwise stay in place.
-
 Once installed, you'll have these slash commands available in any Claude Code session where the Lincx MCP is connected:
 
 | Command | What it does |
 |---|---|
-| `/lincx-template-edit <templateId>` | Pull an existing template from Lincx, set up a working copy in your current project, open the live preview |
 | `/lincx-template-new <name>` | Start a new template from scratch; pick a CAG; author with Claude using the reference library |
-| `/lincx-template-save` | Save the current session. Today: writes a versioned single-file artifact (`<htmlDir>/versions/vN.html`, CSS inlined) for pasting into Lincx. Tomorrow: pushes via the Lincx MCP write tool automatically once it ships — no config change on your side |
 | `/lincx-template-load-ads <zoneId>` | Load real ads from a Lincx zone to use as preview mock data instead of synthesized placeholders |
 | `/lincx-template-preview-toggle` | Pause / resume automatic preview rendering for the current session |
-| `/lincx-template-refresh-schema` | Re-fetch and cache the CAG schema for each active template (use after CAG changes) |
 
 ### Typical workflow
 
 1. `cd` to any project where you want the template files to live.
 2. Start Claude Code (CLI, desktop, or editor extension).
 3. Confirm the Lincx MCP is connected: `/mcp`.
-4. `/lincx-template-edit <templateId>` (adjust existing) or `/lincx-template-new <name>` (from scratch).
+4. `/lincx-template-new <name>` to start from scratch, or ask for the `lincx-template-playbook` skill to build from a bundled baseline.
 5. Claude asks where to put `html` / `css` files — pick sensible paths under the current project.
 6. Chat with Claude to make changes. Every edit triggers the hook, which regenerates `preview.html` next to your files. The browser opens on the first preview of the session; refresh the tab after each change.
-7. `/lincx-template-save` when done. Paste the artifact into Lincx (today) or the save will push via MCP (when that tool ships).
 
 Session state lives in `./.lincx-session.json` in the directory you ran Claude Code from. Safe to commit or gitignore — your call.
 
