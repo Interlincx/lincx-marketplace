@@ -1,24 +1,40 @@
 # Baseline registry
 
-Fill this in once per network. The playbook reads it to pick a baseline. Baselines are never edited in place; they are cloned per client.
+The playbook reads a baseline from this skill's own folder. No network request is needed to pick, read or restyle one, so it works for clients who cannot see any Lincx demo network. Baselines are never edited in place; they are copied per client.
 
-| Type | Version | Network ID | Baseline template ID | CAG ID | Adapter | Notes |
-|---|---|---|---|---|---|---|
-| offer-wall | v1 | lvecuu | u1cfwr | oobfv2 | `adapters/offer-wall.json` | adapter from site-fit; not yet verified against this template |
-| listicle | v1 | lvecuu | u7clvm | 5kf3sq | `adapters/listicle.json` | adapter from site-fit; not yet verified against this template |
-| carousel | v1 | lvecuu | ts86dt | d452s5 | none | no site-fit starter; restyle by hand from its token block |
+| Type | Version | Bundled in | Adapter | Notes |
+|---|---|---|---|---|
+| offer-wall | v1 | `references/baselines/offer-wall/` | `adapters/offer-wall.json` | adapter and files from site-fit; not yet compared with the demo-network copy |
+| listicle | v1 | `references/baselines/listicle/` | `adapters/listicle.json` | adapter and files from site-fit; not yet compared with the demo-network copy |
+| carousel | v1 | not bundled | none | no site-fit starter; its html and css exist only on the demo network. Carousel requests use `full-build.md` until it is exported |
 
 Listings baseline: removed for now. Until one is added, listings requests use the full path (`full-build.md`).
 
+Each bundled folder holds `template.html`, `styles.css`, `cag.json` (the fields the template expects), `mock-ads.json` (the preview's ads) and `SOURCE.md` (origin, version, sha256 of each file). `node ${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs baseline --type <type> --dir <dir>` copies them to your working folder, with `cag-schema.json` in the session's shape.
+
 ## Where the baselines come from
 
-Two copies exist today: lincx-site-fit's starters (`starters/<type>/v1` in `Interlincx/lincx-site-fit`, each with a `SOURCE.md` giving its origin and file hashes, and a test that the prepped baseline renders like the raw one except for an allowlist) and the templates above on the demo-lvecuu network, which are the ones this playbook clones. The plan is one source, site-fit; until it serves its starters from an endpoint the MCP can read, this playbook keeps cloning the network copies.
+The files come from lincx-site-fit's starters (`starters/<type>/v1` in `Interlincx/lincx-site-fit`, copied at `fee4776`), which carry the provenance and a test that the prepped baseline renders like the raw one except for an allowlist. The plan is still one source, site-fit; when it serves its starters from an endpoint, the bundled copies can be refreshed from there (new version, new hashes).
 
-`adapters/` holds, per baseline: `<type>.json` (the token mapping, copied from site-fit's `adapter.json` at `fee4776`: wrapper class, CAG fields, and for each baseline token which site token feeds it, plus `on` (the background it is held to 4.5:1 against) and `derive`) and `<type>.mock.json` (the starter's mock ads for the preview).
+`adapters/` holds, per baseline, `<type>.json`: the token mapping, copied from site-fit's `adapter.json` at `fee4776` (wrapper class, CAG fields, and for each baseline token which site token feeds it, plus `on`, the background it is held to 4.5:1 against, and `derive`).
 
-**The adapters come from site-fit's starters, not from the network templates above.** The two copies are not proven identical (site-fit's demo client uses other template and CAG IDs). The script therefore skips, and the report names, any adapter token the fetched baseline does not declare; it never invents one. When that happens, fix the adapter (or the baseline) and set `"verified": true` in the adapter once a restyle of the network template reports no skipped tokens.
+The adapter and the bundled files come from the same starter, so they match. The script still skips, and the report names, any adapter token the baseline's CSS does not declare; it never invents one. Set `"verified": true` in the adapter once a restyle of the bundled baseline reports no skipped tokens and the result has rendered in a preview.
 
-Versioning: a baseline has a version (`v1`). Changing a baseline in Lincx means a new version row here, a matching adapter, and the version goes into every template name made from it (`restyle.mjs name`).
+Versioning: a baseline has a version (`v1`). Changing a baseline means a new version row here, new files with new hashes in its `SOURCE.md`, a matching adapter, and the version goes into every template name made from it (`restyle.mjs name`).
+
+## The CAG a new template needs
+
+A template is tied to a CAG on the client's own network. `cag.json` lists the fields the baseline expects. Ask the user for the CAG id they want to use, read it with `get_creative_asset_group`, write it to a file and run `restyle.mjs cag-check --type <type> --cag <file>`. `ok: false` (missing or retyped fields) means the template would render with holes: stop and tell the user which fields. Extra fields are harmless. If the client has no matching CAG, say so; creating one from `cag.json` needs the CAG creation tool (lincx-mcp#89, not shipped yet), so until then the user creates it.
+
+## Network copies (reference only)
+
+The same baselines were first cloned from templates on the demo network. The playbook never reads them. They stay listed so the write guard still asks before anything edits them:
+
+| Type | Network ID | Baseline template ID | CAG ID |
+|---|---|---|---|
+| offer-wall | lvecuu | u1cfwr | oobfv2 |
+| listicle | lvecuu | u7clvm | 5kf3sq |
+| carousel | lvecuu | ts86dt | d452s5 |
 
 ## Tokens: each baseline owns its own
 

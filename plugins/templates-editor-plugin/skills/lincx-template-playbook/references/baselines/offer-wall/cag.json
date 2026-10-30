@@ -1,0 +1,48 @@
+{
+  "fieldsOrder": [
+    "src",
+    "logoURL",
+    "headline",
+    "subheadline",
+    "bullet_points",
+    "cta_text",
+    "cta_phone",
+    "banner"
+  ],
+  "fields": {
+    "properties": {
+      "src": {
+        "type": "image",
+        "notes": "Upload logo here"
+      },
+      "logoURL": {
+        "type": "string",
+        "notes": "Externally pull images from URL"
+      },
+      "headline": {
+        "type": "string"
+      },
+      "bullet_points": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "notes": "add additional bullet points if needed"
+      },
+      "cta_text": {
+        "type": "string"
+      },
+      "cta_phone": {
+        "type": "string"
+      },
+      "banner": {
+        "type": "boolean"
+      },
+      "subheadline": {
+        "type": "string"
+      }
+    },
+    "required": [],
+    "additionalProperties": false
+  }
+}
