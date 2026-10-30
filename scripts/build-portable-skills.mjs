@@ -67,6 +67,7 @@ const isCheckablePath = (p) => /^(_shared|references|scripts)\/.*\.[a-z]+$/.test
 
 function build(skillDir, pluginDir, dest) {
   cpSync(skillDir, dest, { recursive: true });
+  const copied = new Set();
 
   // lincx-reports: sibling `_shared/` sits next to the skill folders.
   const shared = join(dirname(skillDir), '_shared');
@@ -83,9 +84,11 @@ function build(skillDir, pluginDir, dest) {
     }
     writeFileSync(file, out);
     for (const d of PLUGIN_ROOT_DIRS) {
-      if (text.includes(`\${CLAUDE_PLUGIN_ROOT}/${d}`) && !existsSync(join(dest, d))) {
+      if (text.includes(`\${CLAUDE_PLUGIN_ROOT}/${d}`) && !copied.has(d)) {
+        copied.add(d);
+        // Merge, not skip: a skill can have its own `references/` (the playbook's bundled baselines) beside the plugin's.
         // check-plugin.mjs lints the Claude plugin layout; meaningless inside a skill.
-        cpSync(join(pluginDir, d), join(dest, d), { recursive: true, filter: (src) => !src.endsWith('check-plugin.mjs') });
+        cpSync(join(pluginDir, d), join(dest, d), { recursive: true, force: false, filter: (src) => !src.endsWith('check-plugin.mjs') });
       }
     }
   }

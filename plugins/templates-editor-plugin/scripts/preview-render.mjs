@@ -44,7 +44,7 @@ export function synthesizeMockAds(cagSchema, count = 2) {
 
 export function validateAdsShape(schema, ads) {
   if (!Array.isArray(ads) || ads.length === 0) return false;
-  const requiredFields = (schema.fields ?? []).map(f => f.name);
+  const requiredFields = (schema.fields ?? []).filter(f => f.required !== false).map(f => f.name);
   return ads.every(ad =>
     ad && typeof ad === 'object' &&
     requiredFields.every(n => Object.prototype.hasOwnProperty.call(ad, n))

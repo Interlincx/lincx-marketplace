@@ -13,6 +13,7 @@
     "cta_text",
     "cta_list"
   ],
+  "cagOptional": ["videoSrc", "cta_list"],
   "tokens": {
     "--lstcl-font": {
       "from": "fontBody.family"
