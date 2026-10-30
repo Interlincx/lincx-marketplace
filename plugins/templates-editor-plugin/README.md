@@ -12,7 +12,7 @@ All covered in the [marketplace README](../../README.md#using-templates-editor-p
 
 ## Playbook restyle (lincx-template-playbook)
 
-Restyling a baseline is done by `scripts/restyle.mjs`, ported from lincx-site-fit: the model reads the publisher's site into a `site-tokens.json` (`skills/lincx-template-playbook/site-tokens.md`); the script validates it, maps it onto the baseline's tokens through `skills/lincx-template-playbook/adapters/<type>.json`, holds text to 4.5:1 contrast, picks and imports the font, refuses unsafe values and reports every decision. It also checks CSS scoping, detects walled sites, builds the deterministic template name and decides create / patch / none / stop on save. `node scripts/restyle.mjs` with no arguments lists the commands.
+The offer-wall and listicle baselines ship inside the playbook skill (`skills/lincx-template-playbook/references/baselines/<type>/`: html, css, the CAG fields it expects, mock ads and a hash-checked `SOURCE.md`), so starting from one needs no request to any Lincx network. Restyling a baseline is done by `scripts/restyle.mjs`, ported from lincx-site-fit: the model reads the publisher's site into a `site-tokens.json` (`skills/lincx-template-playbook/site-tokens.md`); the script validates it, maps it onto the baseline's tokens through `skills/lincx-template-playbook/adapters/<type>.json`, holds text to 4.5:1 contrast, picks and imports the font, refuses unsafe values and reports every decision. It also checks CSS scoping, detects walled sites, builds the deterministic template name and decides create / patch / none / stop on save. `node scripts/restyle.mjs` with no arguments lists the commands.
 
 ## Reference library
 

@@ -12,6 +12,8 @@ import { run } from '../scripts/restyle.mjs';
 const here = dirname(fileURLToPath(import.meta.url));
 const fx = (...p) => join(here, 'fixtures/restyle', ...p);
 const read = (...p) => readFileSync(fx(...p), 'utf8');
+const baselineFile = (t, f) => join(here, '../skills/lincx-template-playbook/references/baselines', t, f);
+const baseline = (t, f) => readFileSync(baselineFile(t, f), 'utf8');
 const adapter = (t) => JSON.parse(readFileSync(join(here, `../skills/lincx-template-playbook/adapters/${t}.json`), 'utf8'));
 const tokens = (n) => JSON.parse(read(n));
 
@@ -62,7 +64,7 @@ test('fonts: licensed families get a stand-in, generics need no import, one vali
 
 for (const type of ['offer-wall', 'listicle']) {
   test(`restyle ${type}: good tokens map, derive, import font, keep the rest (#2, #8)`, () => {
-    const baselineCss = read(type, 'styles.css');
+    const baselineCss = baseline(type, 'styles.css');
     const { css, report, fontImport } = restyle({ siteTokens: tokens('site-tokens-good.json'), adapter: adapter(type), baselineCss });
     const block = readTokenBlock(css, adapter(type).wrapper);
     const a = adapter(type);
@@ -89,7 +91,7 @@ for (const type of ['offer-wall', 'listicle']) {
   });
 
   test(`restyle ${type}: low/missing confidence keeps the baseline and contrast is repaired (#2, #3)`, () => {
-    const baselineCss = read(type, 'styles.css');
+    const baselineCss = baseline(type, 'styles.css');
     const a = adapter(type);
     const { css, report } = restyle({ siteTokens: tokens('site-tokens-low-and-contrast.json'), adapter: a, baselineCss });
     const before = readTokenBlock(baselineCss, a.wrapper);
@@ -117,7 +119,7 @@ test('adapter tokens missing from the fetched baseline are skipped and reported,
 });
 
 test('scope checks: baselines pass, violations are named (#6)', () => {
-  for (const t of ['offer-wall', 'listicle']) assert.deepEqual(cssScopeProblems(read(t, 'template.html'), read(t, 'styles.css')), [], t);
+  for (const t of ['offer-wall', 'listicle']) assert.deepEqual(cssScopeProblems(baseline(t, 'template.html'), baseline(t, 'styles.css')), [], t);
   const html = '<div class="x-wrap"><p>a</p></div><script data-lincx-hook>1</script>';
   assert.equal(deriveWrapperClass(html), 'x-wrap');
   const problems = cssScopeProblems(html, '.x-wrap a{color:red} p{margin:0} .other b{} @media (max-width:1px){ .x-wrap i{} h2{} } @keyframes spin{from{opacity:0}} @font-face{font-family:"Foo";src:url(a)} .x-wrap, ul li{}');
@@ -170,10 +172,10 @@ test('save plan: deterministic name, create / patch / none / stop (#7)', () => {
 });
 
 test('CLI: restyle, check, name, plan-save, wall', () => {
-  const out = run(['restyle', '--baseline', 'listicle', '--tokens', fx('site-tokens-good.json'), '--css', fx('listicle/styles.css')]);
+  const out = run(['restyle', '--baseline', 'listicle', '--tokens', fx('site-tokens-good.json'), '--css', baselineFile('listicle', 'styles.css')]);
   assert.ok(out.css.includes('--') && out.report.includes('mapped'));
-  assert.throws(() => run(['restyle', '--baseline', 'carousel', '--tokens', fx('site-tokens-good.json'), '--css', fx('listicle/styles.css')]), /no adapter for baseline "carousel"/);
-  assert.deepEqual(run(['check', '--html', fx('listicle/template.html'), '--css', fx('listicle/styles.css')]), { ok: true, findings: [] });
+  assert.throws(() => run(['restyle', '--baseline', 'carousel', '--tokens', fx('site-tokens-good.json'), '--css', baselineFile('listicle', 'styles.css')]), /no adapter for baseline "carousel"/);
+  assert.deepEqual(run(['check', '--html', baselineFile('listicle', 'template.html'), '--css', baselineFile('listicle', 'styles.css')]), { ok: true, findings: [] });
   assert.equal(run(['name', '--prefix', 'p', '--client', 'c', '--url', 'https://a.com', '--widget', 'offer-wall', '--version', 'v1']).name, 'p c a-com offer-wall v1');
   assert.throws(() => run(['bogus']), /unknown command/);
   assert.throws(() => run(['restyle', '--baseline']), /option value pairs/);

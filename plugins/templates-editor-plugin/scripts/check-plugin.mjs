@@ -56,7 +56,7 @@ for (const p of [
 ]) check(existsSync(join(pluginRoot, p)), `missing command: ${p}`);
 
 // skill
-for (const f of ['editing-lincx-templates/SKILL.md', 'lincx-template-playbook/SKILL.md', 'lincx-template-playbook/baselines.md', 'lincx-template-playbook/full-build.md', 'lincx-template-playbook/site-tokens.md', 'lincx-template-playbook/adapters/offer-wall.json', 'lincx-template-playbook/adapters/listicle.json']) {
+for (const f of ['editing-lincx-templates/SKILL.md', 'lincx-template-playbook/SKILL.md', 'lincx-template-playbook/baselines.md', 'lincx-template-playbook/full-build.md', 'lincx-template-playbook/site-tokens.md', 'lincx-template-playbook/adapters/offer-wall.json', 'lincx-template-playbook/adapters/listicle.json', ...['offer-wall', 'listicle'].flatMap((t) => ['template.html', 'styles.css', 'cag.json', 'mock-ads.json', 'SOURCE.md'].map((f) => `lincx-template-playbook/references/baselines/${t}/${f}`))]) {
   check(existsSync(join(pluginRoot, 'skills', f)), `missing skill file: ${f}`);
 }
 

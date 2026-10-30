@@ -500,3 +500,25 @@ export function planSave({ existing, desired }) {
   }
   return t.css === desired.css ? { action: 'none', id: t.id } : { action: 'patch', id: t.id };
 }
+
+/** A CAG as { name: type } in field order, from the CAG shape ({ fieldsOrder, fields: { properties } }) or a { fields: [{ name, type }] } session schema. */
+function cagFieldTypes(cag) {
+  if (Array.isArray(cag?.fields)) return Object.fromEntries(cag.fields.map((f) => [f.name, f.type]));
+  const props = cag?.fields?.properties ?? {};
+  return Object.fromEntries((cag?.fieldsOrder ?? Object.keys(props)).map((name) => [name, props[name]?.type]));
+}
+
+/** The session entry's `cagSchema` for a bundled cag.json, so no get_creative_asset_group call is needed. */
+export function cagSessionSchema(cag) {
+  return { fields: Object.entries(cagFieldTypes(cag)).map(([name, type]) => ({ name, type })) };
+}
+
+/** What a client's CAG lacks, adds or types differently compared with the baseline's cag.json. Extra fields are harmless; missing or retyped ones are not. */
+export function cagDiff(baselineCag, clientCag) {
+  const want = cagFieldTypes(baselineCag);
+  const have = cagFieldTypes(clientCag);
+  const missing = Object.keys(want).filter((n) => !(n in have));
+  const retyped = Object.keys(want).filter((n) => n in have && have[n] !== want[n]).map((n) => ({ name: n, baseline: want[n], client: have[n] }));
+  const extra = Object.keys(have).filter((n) => !(n in want));
+  return { ok: missing.length === 0 && retyped.length === 0, missing, retyped, extra };
+}
