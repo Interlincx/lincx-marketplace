@@ -1,0 +1,67 @@
+{
+  "fontBody": {
+    "family": "Source Sans 3",
+    "sizePx": 17,
+    "lineHeight": 1.6,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "fontHeading": {
+    "family": "Gotham",
+    "weight": 700,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorText": {
+    "value": "#222222",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorBackground": {
+    "value": "#fafaf5",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorHeading": {
+    "value": "#111111",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorLink": {
+    "value": "#0a58ca",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "colorAccent": {
+    "value": "#e8590c",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "cta": {
+    "background": "#e8590c",
+    "text": "#ffffff",
+    "radiusPx": 24,
+    "fontWeight": 700,
+    "textTransform": "uppercase",
+    "paddingYPx": 12,
+    "paddingXPx": 20,
+    "label": "See offer",
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "radiusPx": {
+    "value": 8,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "spacingUnitPx": {
+    "value": 8,
+    "confidence": "high",
+    "source": "recorded"
+  },
+  "contentMaxWidthPx": {
+    "value": 1100,
+    "confidence": "high",
+    "source": "recorded"
+  }
+}

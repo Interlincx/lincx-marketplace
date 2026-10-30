@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { readSessionState, writeSessionState } from './session-state.mjs';
+import { parseColor } from './restyle-lib.mjs';
 
 const TOKEN_RE = /\{\{\s*(&\s*)?([\w.]+)\s*\}\}/g;
 
@@ -50,7 +51,7 @@ export function validateAdsShape(schema, ads) {
   );
 }
 
-export function renderPreview({ html, css, cagSchema, mockAds, previewPath }) {
+export function renderPreview({ html, css, cagSchema, mockAds, previewPath, hostBackground }) {
   if (!html) return { ok: false, reason: 'MISSING_HTML' };
   if (!cagSchema) return { ok: false, reason: 'MISSING_SCHEMA' };
 
@@ -61,6 +62,11 @@ export function renderPreview({ html, css, cagSchema, mockAds, previewPath }) {
     usedFallback = true;
   }
 
+  // Optional: paint the publisher's page background, so a transparent widget background and its text contrast show as they will live.
+  const host = parseColor(hostBackground);
+  const hostCss = host
+    ? `body { margin: 0; padding: 16px; background: ${host}; }\n.lincx-preview-ad { padding: 12px; margin: 0 0 16px 0; }`
+    : `body { margin: 0; padding: 16px; background: #f4f4f4; }\n.lincx-preview-ad { background: white; padding: 12px; margin: 0 0 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,.1); }`;
   const iterations = ads.map((ad, i) => {
     const body = substituteTokens(html, ad);
     return `<div class="lincx-preview-ad"><div class="lincx-preview-label">ad #${i + 1}</div>${body}</div>`;
@@ -73,8 +79,7 @@ export function renderPreview({ html, css, cagSchema, mockAds, previewPath }) {
 <title>Lincx template preview</title>
 <style>
 ${css}
-body { margin: 0; padding: 16px; background: #f4f4f4; }
-.lincx-preview-ad { background: white; padding: 12px; margin: 0 0 16px 0; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+${hostCss}
 .lincx-preview-ad > .lincx-preview-label { font: 11px system-ui; color: #888; margin-bottom: 8px; }
 </style>
 </head>
@@ -121,6 +126,7 @@ export async function cli(argv, cwd = process.cwd()) {
       cagSchema: entry.cagSchema,
       mockAds: entry.mockAds,
       previewPath: entry.previewPath,
+      hostBackground: entry.hostBackground,
     });
 
     if (!result.ok) { log(`render failed: ${result.reason}`); return 0; }
