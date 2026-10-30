@@ -4,7 +4,7 @@ Part of the [**lincx-marketplace**](../../README.md). See the marketplace README
 
 ## What this plugin is
 
-Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code with a live preview loop. Pulls via the Lincx MCP, renders a local preview after every edit, and produces a versioned save artifact (will push via MCP once the Lincx write tool ships).
+Build and adjust Lincx ad templates (HTML + Mustache + CSS) from Claude Code with a live preview loop. Renders a local preview after every edit. Saving to Lincx is a direct write through `create_template` / `update_template_content`, which the write guard asks you to confirm.
 
 ## Commands, flow, and workflow
 

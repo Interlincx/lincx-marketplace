@@ -5,6 +5,7 @@
     "auth_login",
     "auth_logout",
     "auth_status",
+    "create_template",
     "explain_serve",
     "get_ad",
     "get_ad_group",
@@ -44,12 +45,8 @@
     "list_zones",
     "network_list",
     "network_refresh",
-    "report_query"
+    "report_query",
+    "update_template_content"
   ],
-  "knownUnresolved": {
-    "get_template_preview_bundle": "Not registered by lincx-mcp at all — planned in docs/superpowers/plans/2026-05-08-deterministic-template-preview.md, never shipped there. See issue #8.",
-    "save_template_version": "Not registered by lincx-mcp; a write tool, against the server's read-only convention. The plugin already guards on its availability. See issue #8.",
-    "create_template": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22.",
-    "update_template_content": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22."
-  }
+  "knownUnresolved": {}
 }
