@@ -51,8 +51,8 @@ Every MCP business tool requires `network_id`. There is no active network, and `
      is archived, its channel is missing, or it has segments on, no segments, and
      fails its own lists). Report that line; there is no table.
    - If the header carries a **NOTE** (`zone.refusesDefaultVisits` /
-     `zone.servesOnlyPinnedVisits`), the zone serves only some visits — repeat it
-     above the table.
+     `zone.servesOnlyPinnedVisits` / `zone.unservedShare`), the zone serves only
+     some visits — repeat it above the table.
 3. Say what **fully live** does not cover: it ignores the group's own rules beyond
    `zoneId` (template, device, geo, daypart, custom keys) and a CAG mismatch, and
    it counts a live ad that depends on the visit (e.g. geo-only) as live, so a

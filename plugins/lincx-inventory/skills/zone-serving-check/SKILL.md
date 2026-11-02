@@ -123,21 +123,40 @@ Work in this order and stop as soon as one step explains it.
    - **`eligible`** — the group's config is fine; the cause is runtime, or the
      ads' own rules — continue. Eligible covers the group's rules only; each ad
      is judged on its own, so a group whose ads are all geo-only stays eligible.
-     Check the ads with `explain_serve` per `adId` (its conditions only, not
-     whether the ad is live — check `enabled` with `get_ad`), or the group's
-     `offers.live` / `offers.conditionalAds` in `get_zone_eligible_ad_groups`. If
-     `matchedKeys[]` has an entry with `source: 'zone-default'` or `'segment'`,
-     it holds only while the visit leaves that key alone — say so.
+     Check the ads with `explain_serve` per `adId` (its conditions and whether it
+     is live), or the group's `offers.live` / `offers.ads[]` in
+     `get_zone_eligible_ad_groups` (Rule 4). If `matchedKeys[]` has an entry with
+     `source: 'zone-default'` or `'segment'`, it holds only while the visit leaves
+     that key alone — say so.
 
    With `adId`, the top-level `verdict`, `reasons`, `conditions`, `paramBlocks`,
    `matchedKeys`, `contradiction` and `excludedByDefault` are the ad × group
    pair's — read the top level; `offer` holds the ad's own rules alone. Read the
    path from `via[]` (group) or `offer.scoped_via[]` in the JSON, not from the
-   header text. If the header carries a **NOTE**, the zone serves only some
-   visits: `zone.refusesDefaultVisits` (visits keeping the defaults get no ad;
-   only those overriding `zone.overriddenOnServedVisits` are served) or
-   `zone.servesOnlyPinnedVisits` (only visits naming a `segmentId`). Lead with
-   that.
+   header text.
+
+   With `adId`, the header also says whether the ad is live, and `offer.live` /
+   `offer.off` carry it. `live` is the whole chain (campaign, ad group, ad,
+   creative) whatever the verdict, so an excluded ad can read `live: true`. A
+   missing `live: true` does not mean off: when a campaign or creative lookup
+   fails for a reason other than a 404, `offer.liveUnknown` is set, `live` is
+   `null` unless what was read already shows the ad off, and the header says
+   "whether the ad is live is unknown (…)". Report that as unknown.
+
+   If the header carries a **NOTE**, the zone serves only some visits:
+   `zone.refusesDefaultVisits` (visits keeping the defaults get no ad; only those
+   overriding `zone.overriddenOnServedVisits` are served),
+   `zone.servesOnlyPinnedVisits` (only visits naming a `segmentId`), or
+   `zone.unservedShare` (a share of the visits that don't pin a `segmentId` get no
+   ad). Lead with that.
+
+   `zone.unservedShare` is `{ min, max, atDefaults?, zoneRules[] }`: percent bounds
+   over unpinned visits, the exact share for visits keeping the defaults when it
+   is known, and the rules in the zone's own lists. An unserved visit fails at
+   least one of those rules; a visit passing them all is served. When `min` and
+   `max` differ, segments whose lists exclude each other can leave the real share
+   well inside them. On such a zone a 404 from a serving call is not by itself a
+   finding: that visit may be in the share.
 
    What a real visit carries: `device` and `deviceOs` from the user agent
    (desktop / other when it says nothing); `geoState` from the tag's
@@ -165,9 +184,10 @@ Work in this order and stop as soon as one step explains it.
    `TZ=America/New_York date '+%a%-H' | tr 'A-Z' 'a-z'` for `dateTimeUS/Eastern`.
    `dateTimeVisitor` is each visitor's own clock; on a `get_zone_ads` call (debug
    or live) it is the UTC token.
-4. **Rule out the runtime filters** an eligible group still faces: ad `enabled` /
-   `archived` and a resolving creative; frequency caps (real repeat visitors only
-   — they never apply to a `get_zone_ads` call, Rule 2); daily / weekly /
+4. **Rule out the runtime filters** an eligible group still faces. `live` from
+   step 1 already covers ad `enabled` / `archived` and a resolving creative; check
+   those by hand only if it reads unknown. The rest: frequency caps (real repeat
+   visitors only — they never apply to a `get_zone_ads` call, Rule 2); daily / weekly /
    monthly / date-range impression, click and action limits on the group and the
    ad; `keyValueLimits` caps; `testCreatives` / `minTrafficAllocation` narrowing
    the group to one ad; forced ad groups / positions on the zone or segment. Only
@@ -199,13 +219,35 @@ so its live count can exceed `get_zone_eligible_ad_groups`'
 `directlyTargetedLive` on the same zone, by design. The gap is the targeted
 groups reading `fully_live: true` that tool reports as `excluded` or
 `conditional`, plus those in `directlyTargetedLiveOnConditionalAds` — eligible
-groups whose live ads all depend on the visit (e.g. every ad geo-only); for those,
-the row's `offers.conditionalAds` lists up to 10 of its visit-dependent ads with
-their conditions, live or not, so check an ad's state before naming it as the one
-that serves. When `offers.conditional` exceeds the list's length the list may be
-cut, or may skip offers that are conditional only through the group's own rules
-(no ad-level conditions), so the live ad may not be in it — read the group's ads
-with `list_ads` / `get_ad`.
+groups whose live ads all depend on the visit (e.g. every ad geo-only).
+
+To reach those groups without paging every row, pass `filter` to
+`get_zone_eligible_ad_groups`:
+
+- `liveOnlyOnConditionalAds` — eligible, `offers.live === 0`,
+  `offers.conditionalLive > 0`: the groups the `…LiveOnConditionalAds` counts name.
+- `hasLiveConditionalAd` — `offers.conditionalLive > 0`, mixed groups included.
+
+`page.filter` echoes the filter and `page.total` / `next_offset` count the
+filtered rows; `summary` stays whole-zone. `filter` applies within `bucket`, so
+`bucket: "directlyTargeted"` with `liveOnlyOnConditionalAds` returns just the
+groups `directlyTargetedLiveOnConditionalAds` counts, and `bucket: "freeRadicals"`
+just those `freeRadicalHostsLiveOnConditionalAds` counts.
+
+Each row's `offers.ads[]` has one entry per ad, with no cap and no ad skipped:
+`{ adId, verdict, live, off?, conditions?, reasons?, paramBlocks?, contradiction?,
+contradictionOverridable? }`, empty fields left out. `verdict` is the pair's, the
+one the counts use. `conditions`, `reasons` and `paramBlocks` are the ad's own, so
+an excluded ad with none of them is out because its group is. `live` is the whole
+chain whatever the verdict, so read `verdict` and `live` together before naming an
+ad as the one that serves: `conditional` and `live: true` render only on the visits
+its `conditions` name. A campaign or creative hidden from the user reads as off
+here; `explain_serve` on that ad says the lookup failed instead.
+
+A row too large for one response comes back as a stub, `{ id, name, verdict,
+omitted }`, with `complete: false`. It carries no `offers`, so it says nothing
+about the group's ads: `explain_serve` gives that group's detail, and `next_offset`
+pages on past it.
 
 The count can also include a group whose conditional ads together cover
 every visit (one mobile-only, one never-mobile), so do not report its groups as
@@ -251,7 +293,8 @@ For the worked example this procedure was derived from, see
   foreign results, so state the one you used.
 - On `"Error: Not authenticated…"` surface it and ask the user to re-authenticate;
   do not retry. On `"Error: Resource not found…"` the zone or ad group ID is wrong
-  — do not invent one. On `"Error: Forbidden…"` the user can't see that resource on the network you used: say which `network_id` you called with and ask whether they meant another network. Do not switch on your own.
+  — do not invent one — unless it came from `get_zone_ads` on a zone with
+  `zone.unservedShare`, where it can be a visit in that share (Flow step 1). On `"Error: Forbidden…"` the user can't see that resource on the network you used: say which `network_id` you called with and ask whether they meant another network. Do not switch on your own.
 - `get_zone_ads` is a read against the live serving path. It is safe to repeat,
   but always send an uppercase state code with debug (Rule 1), in a coherent geo
   set.
