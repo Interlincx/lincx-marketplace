@@ -8,4 +8,4 @@ Invoke the `editing-lincx-templates` skill's **preview-toggle** flow:
 3. Write it back.
 4. Report the new state.
 
-If session state doesn't exist, say so and suggest starting with `/lincx-template-edit` or `/lincx-template-new`.
+If session state doesn't exist, say so and suggest starting with `/lincx-template-new`.
