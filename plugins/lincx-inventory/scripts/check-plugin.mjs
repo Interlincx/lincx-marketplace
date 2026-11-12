@@ -25,6 +25,7 @@ for (const p of [
   'commands/zone-serving-check.md',
   'skills/zone-serving-check/SKILL.md',
   'skills/zone-serving-check/reference.md',
+  'skills/zone-editor/SKILL.md',
 ]) check(existsSync(join(pluginRoot, p)), `missing: ${p}`);
 
 if (errors.length) {
