@@ -52,6 +52,8 @@
     "create_template": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22.",
     "update_template_content": "Write tool, not registered by lincx-mcp yet. Named in lincx-template-playbook; direct writes are opt-in only. See issue #22.",
     "create_dimension_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#110, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35.",
-    "add_dimensions_to_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#111, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35."
+    "add_dimensions_to_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#111, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35.",
+    "create_zone": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#112, open). Named in zone-editor; drop this entry once it is in the snapshot. See issue #42.",
+    "update_zone": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#115, open). Named in zone-editor; drop this entry once it is in the snapshot. See issue #42."
   }
 }
