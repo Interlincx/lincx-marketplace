@@ -1,0 +1,155 @@
+name: Automated PR Review
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  review-pr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    concurrency:
+      group: pr-review-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Compute tree hash
+        id: tree
+        run: |
+          set -euo pipefail
+          HASH=$(git rev-parse "HEAD^{tree}")
+          if [ -z "$HASH" ]; then
+            echo "Error: could not compute tree hash"
+            exit 1
+          fi
+          echo "hash=$HASH" >> "$GITHUB_OUTPUT"
+
+      - name: Check if tree already reviewed
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: .review-marker
+          key: review-tree-${{ github.event.pull_request.number }}-${{ steps.tree.outputs.hash }}
+
+      - name: Trigger Devin PR Review
+        id: devin-review
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          DEVIN_SERVICE_USER_API_KEY: ${{ secrets.DEVIN_SERVICE_USER_API_KEY }}
+          DEVIN_ORG_ID: ${{ secrets.DEVIN_ORG_ID }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "$DEVIN_ORG_ID" ]; then
+            echo "Error: DEVIN_ORG_ID secret is not set."
+            exit 1
+          fi
+
+          PR_URL="https://github.com/${{ github.repository }}/pull/${PR_NUMBER}"
+          BODY=$(jq -n --arg pr_url "$PR_URL" '{pr_url: $pr_url}')
+
+          RAW=$(curl -s -X POST \
+            -H "Authorization: Bearer $DEVIN_SERVICE_USER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$BODY" \
+            --connect-timeout 10 \
+            --max-time 60 \
+            -w "\n%{http_code}" \
+            "https://api.devin.ai/v3/organizations/${DEVIN_ORG_ID}/pr-reviews")
+          HTTP_CODE=$(echo "$RAW" | tail -n1)
+          RESPONSE=$(echo "$RAW" | sed '$d')
+
+          echo "Devin API responded with HTTP $HTTP_CODE"
+
+          # 409 Conflict: a review already exists for this PR. The endpoint
+          # auto-re-reviews subsequent pushes to the same pr_url, so a 409 means
+          # it is already tracking the PR and will review the new push. Treat as
+          # success and cache the tree to avoid redundant POSTs for the same
+          # tree hash. A new commit with a changed tree misses the cache and
+          # re-triggers; a squash/rebase that leaves the tree unchanged hits the
+          # cache and skips (one review per unique tree).
+          if [ "$HTTP_CODE" -eq 409 ]; then
+            echo "A Devin review already exists for this PR (HTTP 409)."
+            {
+              echo "review-status=already_exists"
+              echo "review-repo-path=unknown"
+              echo "review-commit-sha=unknown"
+            } >> "$GITHUB_OUTPUT"
+            {
+              echo "### Devin Review Already Exists"
+              echo "PR: $PR_URL"
+              echo "Status: already_exists"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "$HTTP_CODE" -ge 400 ]; then
+            if echo "$RESPONSE" | jq -e . >/dev/null 2>&1; then
+              ERROR_DETAIL=$(echo "$RESPONSE" | jq -r '
+                .detail as $d |
+                if ($d | type) == "array" then
+                  ($d | map(if type == "object" then (.msg // .type // tostring) else . end) | join("; "))
+                elif ($d | type) == "string" then
+                  $d
+                else
+                  empty
+                end
+              ')
+              if [ -n "$ERROR_DETAIL" ]; then
+                echo "Error triggering Devin review: $ERROR_DETAIL"
+                exit 1
+              fi
+            fi
+            echo "Error triggering Devin review: $RESPONSE"
+            exit 1
+          fi
+
+          # Validate JSON before parsing; a non-JSON 2xx means the review
+          # status is unknown — fail so the tree is not cached as reviewed
+          if ! echo "$RESPONSE" | jq -e . >/dev/null 2>&1; then
+            echo "Error: Devin API returned a non-JSON response: $RESPONSE"
+            exit 1
+          fi
+
+          STATUS=$(echo "$RESPONSE" | jq -r '.status // empty')
+          REPO_PATH=$(echo "$RESPONSE" | jq -r '.repo_path // empty')
+          COMMIT_SHA=$(echo "$RESPONSE" | jq -r '.commit_sha // empty')
+
+          if [ -z "$STATUS" ] || [ -z "$REPO_PATH" ] || [ -z "$COMMIT_SHA" ]; then
+            echo "Warning: Devin review response is missing expected fields."
+          fi
+
+          {
+            echo "review-status=${STATUS:-unknown}"
+            echo "review-repo-path=${REPO_PATH:-unknown}"
+            echo "review-commit-sha=${COMMIT_SHA:-unknown}"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Devin Review Triggered"
+            echo "PR: $PR_URL"
+            echo "Status: ${STATUS:-unknown}"
+            echo "Commit SHA: ${COMMIT_SHA:-unknown}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Mark tree as reviewed
+        if: success() && steps.cache.outputs.cache-hit != 'true'
+        run: touch .review-marker
