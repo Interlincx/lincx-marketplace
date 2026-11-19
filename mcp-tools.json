@@ -54,6 +54,16 @@
     "create_dimension_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#110, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35.",
     "add_dimensions_to_set": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#111, open). Named in lincx-report-builder; drop this entry once it is in the snapshot. See issue #35.",
     "create_zone": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#112, open). Named in zone-editor; drop this entry once it is in the snapshot. See issue #42.",
-    "update_zone": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#115, open). Named in zone-editor; drop this entry once it is in the snapshot. See issue #42."
+    "update_zone": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#115, open). Named in zone-editor; drop this entry once it is in the snapshot. See issue #42.",
+    "create_advertiser": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#168, open, issue #158). Named in advertiser-editor; drop this entry once it is in the snapshot. See issue #46.",
+    "update_advertiser": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#169, open, issue #159). Named in advertiser-editor; drop this entry once it is in the snapshot. See issue #46.",
+    "create_campaign": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#170, open, issue #160). Named in campaign-editor; drop this entry once it is in the snapshot. See issue #47.",
+    "update_campaign": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#171, open, issue #161). Named in campaign-editor; drop this entry once it is in the snapshot. See issue #47.",
+    "create_ad_group": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#172, open, issue #162). Named in ad-group-editor; drop this entry once it is in the snapshot. See issue #48.",
+    "update_ad_group": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#173, open, issue #163). Named in ad-group-editor; drop this entry once it is in the snapshot. See issue #48.",
+    "create_ad": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#174, open, issue #164). Named in ad-editor; drop this entry once it is in the snapshot. See issue #49.",
+    "update_ad": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#175, open, issue #165). Named in ad-editor; drop this entry once it is in the snapshot. See issue #49.",
+    "create_creative": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#176, open, issue #166). Named in creative-editor; drop this entry once it is in the snapshot. See issue #50.",
+    "update_creative": "Write tool, not registered by lincx-mcp yet (Interlincx/lincx-mcp#177, open, issue #167). Named in creative-editor; drop this entry once it is in the snapshot. See issue #50."
   }
 }
