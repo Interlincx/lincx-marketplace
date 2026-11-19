@@ -25,6 +25,11 @@
       "name": "lincx-analysis",
       "source": "./plugins/lincx-analysis",
       "description": "Zone tier analysis — the platform computes the tiers, Claude writes the narrative"
+    },
+    {
+      "name": "lincx-advertising",
+      "source": "./plugins/lincx-advertising",
+      "description": "Advertising-side edits — create and update advertisers, campaigns, ad groups, ads and creatives, behind reads and confirmation"
     }
   ]
 }
