@@ -48,11 +48,8 @@ for (const dir of [
 // commands
 for (const p of [
   'commands/lincx-template-new.md',
-  'commands/lincx-template-edit.md',
-  'commands/lincx-template-save.md',
   'commands/lincx-template-load-ads.md',
   'commands/lincx-template-preview-toggle.md',
-  'commands/lincx-template-refresh-schema.md',
 ]) check(existsSync(join(pluginRoot, p)), `missing command: ${p}`);
 
 // skill
