@@ -57,16 +57,13 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 - **"makes it a free radical"** / **"is a free radical"** (create, enable or remove-last): say what that means and ask which zones to add; never add `allowUntargeted` on your own.
 - **"Campaign … is switched off" / "outside its flight window"**: the write landed, but nothing in the campaign serves yet. Say so; changing the campaign is the `campaign-editor` skill.
 - **A WARNING that the group targets no zone**: it is enabled and open in every zone on its CAG. Repeat it word for word; if the user didn't ask for that, suggest turning it off or adding zones.
-- **"belongs to network …" / "is not in network …" / "is archived" / "not found"** (the campaign, CAG or group): report it. Don't swap in another entity without asking.
-- **Forbidden**: the user can't write ad groups in this campaign or network. Say so; don't retry.
-- **"Nothing to change"**: the group already holds those values. Say so; no write happened.
+- **Any other refusal** — **"Nothing to change"**, **"belongs to network …" / "is not in network …" / "is archived" / "not found"**, **Forbidden**: nothing was written. Report it as the tool worded it. Don't retry, and don't swap in another campaign, CAG or group without asking.
 
 ## What you never do
 
-- Write without explicit confirmation in the user's most recent message.
-- Retry a create or an edit before re-reading what landed.
+Beyond the checklists above:
+
 - Create or leave a group with no whitelisted zone unless the user said that is intended.
 - Pass `allowUntargeted` without the user asking for an untargeted group.
 - Offer to change what the tools can't: the CAG, campaign or advertiser, other targeting keys (geo, device, time, data attributes), limits, frequency capping, archive. Point the user to the Lincx UI.
 - Bundle several writes, or several ad groups, into one confirmation.
-- Pick a network for the user.

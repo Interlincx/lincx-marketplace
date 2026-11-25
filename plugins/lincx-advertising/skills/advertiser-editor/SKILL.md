@@ -50,16 +50,13 @@ Propose the whole plan first if the user asked for all of it, then confirm and w
 
 - **"MAY have been created/applied"** or **"most likely applied"** (a timeout, a 5xx, a 2xx with no body): the write may have landed. Re-read (`list_advertisers` for a create, `get_advertiser` for a rename) before anything else. Never retry blind — a create retry makes a duplicate.
 - **"already named"**: another active advertiser has that name. Show it; ask the user for another name or to use that one.
-- **"Nothing to change"**: the advertiser already has that name. Say so; no write happened.
-- **"belongs to network …" / "is not in network …" / "is archived" / "not found"**: report it. Don't switch to another advertiser without asking.
 - **"could not read the network's advertisers to check for a duplicate name"**: nothing was written — the duplicate check couldn't run. Say so and try again later; never write without that check.
-- **Forbidden**: the user can't write advertisers on this network. Say so; don't retry.
+- **Any other refusal** — **"Nothing to change"**, **"belongs to network …" / "is not in network …" / "is archived" / "not found"**, **Forbidden**: nothing was written. Report it as the tool worded it. Don't retry, and don't swap in another advertiser without asking.
 
 ## What you never do
 
-- Write without explicit confirmation in the user's most recent message.
-- Retry a create or a rename before re-reading what landed.
+Beyond the checklists above:
+
 - Rename an advertiser someone else owns without saying ownership moves.
 - Offer to change what the tools can't: owner, members, archive or unarchive. Point the user to the Lincx UI.
 - Bundle several writes, or several advertisers, into one confirmation.
-- Pick a network for the user.
