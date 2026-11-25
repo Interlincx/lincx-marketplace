@@ -55,16 +55,13 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 - **"minTrafficAllocation … was dropped"**: repeat the value; it is set again in the Lincx UI.
 - **A creative refused** (another CAG, another advertiser, archived — "pick another creative"): report it and pick again with the user. Never swap in a creative they didn't choose.
 - **"Sum of ads traffic allocations within AdGroup should be equal or lower than 100%"** (update only — `create_ad` never sends an allocation): the edited ad is enabled and has its own `minTrafficAllocation`, and with the group's other enabled ads the total would go over 100%. Report it; allocations are changed in the Lincx UI.
-- **"belongs to network …" / "is not in network …" / "is archived" / "not found"** (the ad, its group or the creative): report it. Don't swap in another entity without asking.
-- **Forbidden**: the user can't write ads in this ad group or network. Say so; don't retry.
-- **"Nothing to change"**: the ad already holds those values. Say so; no write happened.
+- **Any other refusal** — **"Nothing to change"**, **"belongs to network …" / "is not in network …" / "is archived" / "not found"**, **Forbidden**: nothing was written. Report it as the tool worded it. Don't retry, and don't swap in another ad, group or creative without asking.
 
 ## What you never do
 
-- Write without explicit confirmation in the user's most recent message.
-- Retry a create or an edit before re-reading what landed.
+Beyond the checklists above:
+
 - Invent, round or reuse a price the user didn't give for this ad.
 - Create or switch on an ad without saying where it will serve.
 - Offer to change what the tools can't: moving an ad to another ad group, cpmOverride, boost, ad-level targeting, limits, postback pixels, test creatives, traffic allocation, archive. Point the user to the Lincx UI.
 - Bundle several writes, or several ads, into one confirmation.
-- Pick a network for the user.

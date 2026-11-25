@@ -49,8 +49,7 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 
 ## What you never do
 
-- Write without explicit confirmation in the user's most recent message.
-- Retry a create or an edit before re-reading what landed.
+Beyond the checklists above:
+
 - Offer to change what the tools can't: site, publisher, channel, network, `type` after create, segments, allow/blocklists, forced ads, scoring override, postback pixels, test templates. Point the user to the Lincx UI.
 - Bundle a write with an unrelated question, or edit several zones from one confirmation the user didn't give for each.
-- Pick a network for the user.

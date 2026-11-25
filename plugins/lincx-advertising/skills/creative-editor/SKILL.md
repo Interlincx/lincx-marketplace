@@ -51,19 +51,16 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 - **"field problem(s)"**: each line names the field and what's wrong (not a field of the CAG, wrong type, required). Fix those with the user and confirm again; don't guess a replacement value.
 - **"url must be an http(s) URL"**: the click URL isn't a web address. Ask for the right one.
 - **"url has an unbalanced {{macro}}"**: a `{{` without its `}}` (or the reverse). Show the URL and ask the user to fix it.
-- **"belongs to network …" / "is not in network …" / "is archived" / "not found"** (the advertiser, CAG or creative): report it. Don't swap in a different entity without asking; an archived creative is unarchived in the Lincx UI.
-- **Forbidden**: the user can't write creatives for this advertiser or network. Say so; don't retry.
 - **"did not apply …"**: the API accepted the call but kept the old value. Re-read with `get_creative`; don't retry the same edit.
 - **"changed since it was read"**: someone else edited the creative (or removed the same field) since the tool read it. Nothing was written. Re-read with `get_creative`, re-propose, and confirm again.
 - **A WARNING that the click URL doesn't pass `{{clickId}}`** (or has it in the wrong format): the write landed, but clicks won't carry Lincx's click id. Repeat it and offer to fix the URL.
-- **"Nothing to change"**: the creative already holds those values. Say so; no write happened.
+- **Any other refusal** — **"Nothing to change"**, **"belongs to network …" / "is not in network …" / "is archived" / "not found"**, **Forbidden**: nothing was written. Report it as the tool worded it. Don't retry, and don't swap in another advertiser, CAG or creative without asking. An archived creative is unarchived in the Lincx UI.
 
 ## What you never do
 
-- Write without explicit confirmation in the user's most recent message.
-- Retry a create or an edit before re-reading what landed.
+Beyond the checklists above:
+
 - Make up ad copy, a click URL or an image URL the user didn't give.
 - Edit a creative without saying how many ads show it.
 - Offer to change what the tools can't: the CAG, the advertiser, remote feeds, group offers, delta-based pricing, file uploads, archive. Point the user to the Lincx UI.
 - Bundle several writes, or several creatives, into one confirmation.
-- Pick a network for the user.

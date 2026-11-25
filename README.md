@@ -276,7 +276,7 @@ node scripts/sync-mcp-tools.mjs ../lincx-mcp # or from a local clone
 
 To check that every skill still works outside Claude Code, run `node scripts/build-portable-skills.mjs`. It exits non-zero on a spec violation or on a reference that points outside the skill.
 
-Plugin architecture docs, the full design spec, and the implementation plan live under `docs/superpowers/`. The `todo.md` at the root tracks deferred items (most notable: upgrading the local preview renderer to full Mustache).
+The design spec and plan for work that has not shipped yet live under `docs/superpowers/`; those for shipped plugins are in the git history. The `todo.md` at the root tracks deferred items (most notable: upgrading the local preview renderer to full Mustache).
 
 ---
 

@@ -47,16 +47,13 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 - **"did not apply …"**: the API accepted the call but kept the old value. Re-read with `get_campaign` and report what it holds; don't retry the same edit.
 - **"dateStart must be on or before dateEnd"** (edit) / **"is after dateEnd"** (create): the window is inverted — on an edit, the new value clashes with the stored other bound. Show both dates and ask which to change.
 - **"is already past"** (create): the `dateEnd` is before today in UTC, so the campaign would never serve. Ask for the real end date.
-- **"Nothing to change"**: the campaign already holds those values. Say so; no write happened.
-- **"belongs to network …" / "is not in network …" / "is archived" / "not found"**: report it. Don't switch to another campaign or advertiser without asking.
-- **Forbidden**: the user can't write campaigns for this advertiser or network. Say so; don't retry.
+- **Any other refusal** — **"Nothing to change"**, **"belongs to network …" / "is not in network …" / "is archived" / "not found"**, **Forbidden**: nothing was written. Report it as the tool worded it. Don't retry, and don't swap in another campaign or advertiser without asking.
 
 ## What you never do
 
-- Write without explicit confirmation in the user's most recent message.
-- Retry a create or an edit before re-reading what landed.
+Beyond the checklists above:
+
 - Switch a campaign on or off without saying how many ad groups it reaches.
 - Turn a campaign on, or widen its window, without naming its enabled ad groups that have no zone targeting.
 - Offer to change what the tools can't: the advertiser, archive or unarchive. Point the user to the Lincx UI.
 - Bundle several writes, or several campaigns, into one confirmation.
-- Pick a network for the user.
