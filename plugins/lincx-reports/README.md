@@ -10,7 +10,7 @@ Plus a builder for the reports themselves:
 
 - **Report builder** — when a question needs dimensions no report has, or you ask to create or extend a report. It reviews every report on the network first, recommends creating a new one by default, and adds to an existing one only when asked. Needs the `create_dimension_set` and `add_dimensions_to_set` MCP tools (lincx-mcp #110, #111); until they ship it can still review and recommend, but a write will fail.
 
-A router skill (`lincx-reports`) detects the intent and loads the matching sub-skill.
+Each report is its own skill, triggered by its description. The rules they share (date range, auth, network) are in `skills/_shared/ground-rules.md`.
 
 ## Install
 

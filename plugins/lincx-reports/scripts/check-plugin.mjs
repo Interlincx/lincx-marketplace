@@ -21,16 +21,17 @@ if (existsSync(manifestPath)) {
 
 // expected skills (auto-discovered by Claude Code, but we sanity-check presence)
 for (const skill of [
-  'skills/lincx-reports/SKILL.md',
   'skills/lincx-campaign-performance/SKILL.md',
   'skills/lincx-revenue-summary/SKILL.md',
   'skills/lincx-creative-anomalies/SKILL.md',
   'skills/lincx-report-builder/SKILL.md',
   'skills/lincx-report-builder/references/decision-table.md',
+  'skills/lincx-report-builder/references/write-tools.md',
 ]) check(existsSync(join(pluginRoot, skill)), `missing skill: ${skill}`);
 
 // expected shared helpers
 for (const ref of [
+  'skills/_shared/ground-rules.md',
   'skills/_shared/date-range.md',
   'skills/_shared/output-template.md',
   'skills/_shared/dimension-discovery.md',

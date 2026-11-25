@@ -1,11 +1,11 @@
 ---
 name: lincx-creative-anomalies
-description: Use when the user asks about top/bottom creatives, zones, sites, or templates, or about WoW/DoD drops, lifts, or anomalies in Lincx delivery. Loaded by the lincx-reports router.
+description: Use when the user asks about top/bottom creatives, zones, sites, or templates, or about WoW/DoD drops, lifts, or anomalies in Lincx delivery.
 ---
 
 # Lincx — Creative anomalies
 
-You produce one of two reports based on the user's wording: **Winners/losers** or **Anomaly comparison**. Output contract is `_shared/output-template.md`.
+You produce one of two reports based on the user's wording: **Winners/losers** or **Anomaly comparison**. Output contract is `_shared/output-template.md`. The rules every report follows (date range, auth, network) are in `_shared/ground-rules.md`: read it first.
 
 ## Mode A — Winners / losers
 
@@ -41,10 +41,6 @@ Triggered by "dropped", "fell", "spiked", "this week vs last week", "today vs ye
 7. **Sort by `|delta_pct|` descending.** Render with column order:
 
    `<entity> | current | prior | delta_pct | delta_abs`
-
-## Single-zone fast path
-
-If the user asks about a single specific zone, prefer `get_zone_report({ network_id, id, resolution, startDate, endDate })` directly. It is cheaper and avoids dimension-set selection.
 
 Apply `_shared/mcp-call-patterns.md` across both modes for pagination semantics, error-string handling, truncation detection, and the ≤ 5 tool-call budget.
 

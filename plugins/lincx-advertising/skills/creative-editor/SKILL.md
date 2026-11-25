@@ -1,6 +1,6 @@
 ---
 name: creative-editor
-description: Use when the user asks to create a Lincx creative (the content an ad renders — headline, image, click URL and the other fields its creative asset group defines), or to rename one, change its click URL or edit its field values. Gates create_creative and update_creative behind reads and confirmation.
+description: Use when the user asks to create a Lincx creative (the content an ad renders — headline, image, click URL and the other fields its creative asset group defines), or to rename one, change its click URL or edit its field values.
 ---
 
 # Lincx — Creative editor

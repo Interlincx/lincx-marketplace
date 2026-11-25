@@ -30,11 +30,6 @@ for (const ref of [
   'skills/lincx-zone-tiering/references/output-template.md',
 ]) check(existsSync(join(pluginRoot, ref)), `missing reference: ${ref}`);
 
-// expected commands
-for (const cmd of [
-  'commands/zone-tiering.md',
-]) check(existsSync(join(pluginRoot, cmd)), `missing command: ${cmd}`);
-
 if (errors.length) {
   for (const e of errors) console.error('✖', e);
   process.exit(1);

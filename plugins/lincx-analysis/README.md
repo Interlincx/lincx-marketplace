@@ -37,8 +37,8 @@ What that buys:
 ## Command
 
 ```
-/zone-tiering abc123 2026-06-01 2026-06-30
-/zone-tiering abc123 2026-06-01 2026-06-30 ranked
+/lincx-zone-tiering abc123 2026-06-01 2026-06-30
+/lincx-zone-tiering abc123 2026-06-01 2026-06-30 ranked
 ```
 
 Arguments are optional and order-independent — a 6-character token is the zone, ISO

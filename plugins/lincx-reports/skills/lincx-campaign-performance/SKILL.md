@@ -1,11 +1,11 @@
 ---
 name: lincx-campaign-performance
-description: Use when the user asks how a Lincx campaign performed over a date range — spend, impressions, clicks, conversions, CTR, eCPM. Loaded by the lincx-reports router.
+description: Use when the user asks how a Lincx campaign performed over a date range — spend, impressions, clicks, conversions, CTR, eCPM.
 ---
 
 # Lincx — Campaign performance
 
-You produce a campaign-performance report. The output contract is `_shared/output-template.md`.
+You produce a campaign-performance report. The output contract is `_shared/output-template.md`. The rules every report follows (date range, auth, network) are in `_shared/ground-rules.md`: read it first.
 
 ## Flow
 

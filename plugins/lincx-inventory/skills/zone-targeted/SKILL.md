@@ -1,6 +1,7 @@
 ---
 name: zone-targeted
-description: Use when the user asks which ad groups are directly targeted to a Lincx zone, or whether a zone's targeted ad groups are live/off — the exhaustive zone-targeting inventory with an enabled-state rollup. Backs the /zone-targeted command.
+description: Use when the user asks which ad groups are directly targeted to a Lincx zone, or whether a zone's targeted ad groups are live/off.
+argument-hint: "[zoneId] [all|live|off]"
 ---
 
 # Lincx — Zone targeting inventory
@@ -20,8 +21,8 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 
 ## Inputs
 - `network_id` — required, see Network above.
-- `zoneId` — required (the command resolves it, remembering the last one).
-- `mode` — `all` (default) | `live` (only fully-live) | `off` (only not-fully-live).
+- `zoneId` — required. When one is given, remember it: `node ${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs set <zoneId>`. When none is given, reuse the remembered one (`node ${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs get`); if that prints nothing, ask.
+- `mode` — a token that is exactly `all` (default), `live` (only fully-live) or `off` (only not-fully-live). Any other token is the zoneId.
 
 ## Flow
 

@@ -1,6 +1,6 @@
 ---
 name: campaign-editor
-description: Use when the user asks to create a Lincx campaign, or to rename a campaign, change its flight dates, or switch it on or off. Gates create_campaign and update_campaign behind reads and confirmation.
+description: Use when the user asks to create a Lincx campaign, or to rename a campaign, change its flight dates, or switch it on or off.
 ---
 
 # Lincx — Campaign editor
