@@ -20,11 +20,10 @@ if (existsSync(manifestPath)) {
 
 for (const p of [
   'scripts/session-state.mjs',
-  'commands/zone-targeted.md',
   'skills/zone-targeted/SKILL.md',
-  'commands/zone-serving-check.md',
   'skills/zone-serving-check/SKILL.md',
   'skills/zone-serving-check/reference.md',
+  'skills/zone-serving-check/fields.md',
   'skills/zone-editor/SKILL.md',
 ]) check(existsSync(join(pluginRoot, p)), `missing: ${p}`);
 

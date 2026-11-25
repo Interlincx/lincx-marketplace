@@ -1,6 +1,7 @@
 ---
 name: zone-serving-check
-description: Use when the user asks which ads actually serve in a Lincx zone, why an offer is or isn't showing, or wants to reconcile serving against targeting — anything that calls explain_serve or get_zone_ads, especially with debug. Enforces reading the config verdict first and the geo-parameterised debug procedure, to avoid false "missing offer" findings.
+description: Use when the user asks which ads actually serve in a Lincx zone, why an offer is or isn't showing, or wants to reconcile serving against targeting — anything that calls explain_serve or get_zone_ads.
+argument-hint: "[zoneId] [adGroupId] [geoState] [geoPostal]"
 ---
 
 # Lincx — Zone serving check
@@ -26,9 +27,9 @@ Every MCP business tool requires `network_id`. There is no active network, and `
 
 ## Inputs
 - `network_id` — required, see Network above.
-- `zoneId` — required.
+- `zoneId` — required. A token matching `^[a-z0-9]{6}$` is the zoneId; a second such token is the `adGroupId`. When one is given, remember it: `node ${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs set <zoneId>`. When none is given, reuse the remembered one (`node ${CLAUDE_PLUGIN_ROOT}/scripts/session-state.mjs get`); if that prints nothing, ask.
 - `adGroupId` or `adId` — when the question is about one offer.
-- Geo — an uppercase state code is **required** for every debug call, see Rule 1.
+- Geo — `^[A-Z]{2}$` is `geoState`, `^\d{5}$` is `geoPostal`. An uppercase state code is **required** for every debug call, see Rule 1. If no geo is given and an `adGroupId` is, read its `geo[]` and pick an in-list state; otherwise ask.
 - `adFeedCount` — ignored on debug; it only bounds a live call.
 
 ## Rule 1 — never call debug without an uppercase state code
@@ -62,10 +63,7 @@ real serving, as **one request** with:
   whose browser sends local time.
 - No visitor, so frequency caps are skipped.
 
-The pool holds up to 1000 ads. On a segments-on zone the cap is instead the
-`adFeedCount` of whichever candidate is picked — the segment's own, or the zone's
-own when the zone itself is picked — and 1000 when it has none. A
-tiering-enabled template returns every ad regardless.
+The pool holds up to 1000 ads; Rule 5 says what else can cap it.
 
 Each entry is one ad per ad group, with `score`, `cpm`, `impressions` and its ad
 group as `name:id`; the response adds `impressionsTotal` and `maxCPM`. It does
@@ -74,14 +72,10 @@ is the pick among an ad group's equally scored ads, so repeat a call before
 reading anything into a single absence. Debug also requires the caller to be a
 member or owner of the zone's network; otherwise it answers `ACCESS DENIED`.
 
-**The live call** (`debug` omitted) is a desktop visit (`deviceOs: other`) with
-the geo as sent (`''` when none, failing every geo whitelist), the same server
-UTC clock, and a fresh visitor (never capped). It returns only the winners — up
-to the zone's or picked segment's `adFeedCount`, or all of them on a
-tiering-enabled template — as creative payloads with `adId` / `adGroupId`, plus
-the `template` and `segmentId` / `segmentName` picked, and **no scores**. Use it
-only to confirm what a desktop visitor actually receives, or which segment and
-template were picked.
+**The live call** (`debug` omitted) is a desktop visit with a fresh visitor. It
+returns only the winners, with no scores. Use it only to confirm what a desktop
+visitor actually receives, or which segment and template were picked; what it
+sends and returns is in [fields.md](fields.md).
 
 ## Rule 3 — pick the geo deliberately
 
@@ -129,43 +123,10 @@ Work in this order and stop as soon as one step explains it.
      `source: 'zone-default'` or `'segment'`, it holds only while the visit leaves
      that key alone — say so.
 
-   With `adId`, the top-level `verdict`, `reasons`, `conditions`, `paramBlocks`,
-   `matchedKeys`, `contradiction` and `excludedByDefault` are the ad × group
-   pair's — read the top level; `offer` holds the ad's own rules alone. Read the
-   path from `via[]` (group) or `offer.scoped_via[]` in the JSON, not from the
-   header text.
-
-   With `adId`, the header also says whether the ad is live, and `offer.live` /
-   `offer.off` carry it. `live` is the whole chain (campaign, ad group, ad,
-   creative) whatever the verdict, so an excluded ad can read `live: true`. A
-   missing `live: true` does not mean off: when a campaign or creative lookup
-   fails for a reason other than a 404, `offer.liveUnknown` is set, `live` is
-   `null` unless what was read already shows the ad off, and the header says
-   "whether the ad is live is unknown (…)". Report that as unknown.
-
-   If the header carries a **NOTE**, the zone serves only some visits:
-   `zone.refusesDefaultVisits` (visits keeping the defaults get no ad; only those
-   overriding `zone.overriddenOnServedVisits` are served),
-   `zone.servesOnlyPinnedVisits` (only visits naming a `segmentId`), or
-   `zone.unservedShare` (a share of the visits that don't pin a `segmentId` get no
-   ad). Lead with that.
-
-   `zone.unservedShare` is `{ min, max, atDefaults?, zoneRules[] }`: percent bounds
-   over unpinned visits, the exact share for visits keeping the defaults when it
-   is known, and the rules in the zone's own lists. An unserved visit fails at
-   least one of those rules; a visit passing them all is served. When `min` and
-   `max` differ, segments whose lists exclude each other can leave the real share
-   well inside them. On such a zone a 404 from a serving call is not by itself a
-   finding: that visit may be in the share.
-
-   What a real visit carries: `device` and `deviceOs` from the user agent
-   (desktop / other when it says nothing); `geoState` from the tag's
-   `data-geo-state`, else the geo-lookup region code (uppercase, e.g. `TX`), or
-   `''` when the lookup finds no region — which fails every `geoState` / `geo`
-   whitelist; a lowercase `params.geoState` rule like `tx` never matches; and the
-   `dateTime*` keys from the visit's timestamp — `dateTimeUTC` / `dateTimeUS/*`
-   in their fixed zones, `dateTimeVisitor` in the browser's own offset (not its
-   geo).
+   With `adId`, with a **NOTE** in the header, or when you need to say what a
+   real visit carries (device, geo, clock), read [fields.md](fields.md) first: it
+   says which fields are the ad's, how `live` reads when a lookup fails, and how
+   to report a zone that serves only some visits.
 2. **`get_ad_group({ network_id, id, include: ["parents"] })`** — read, in this
    order:
    - `enabled` and `archived`, and the parent campaign's `enabled` and
@@ -221,37 +182,8 @@ groups reading `fully_live: true` that tool reports as `excluded` or
 `conditional`, plus those in `directlyTargetedLiveOnConditionalAds` — eligible
 groups whose live ads all depend on the visit (e.g. every ad geo-only).
 
-To reach those groups without paging every row, pass `filter` to
-`get_zone_eligible_ad_groups`:
-
-- `liveOnlyOnConditionalAds` — eligible, `offers.live === 0`,
-  `offers.conditionalLive > 0`: the groups the `…LiveOnConditionalAds` counts name.
-- `hasLiveConditionalAd` — `offers.conditionalLive > 0`, mixed groups included.
-
-`page.filter` echoes the filter and `page.total` / `next_offset` count the
-filtered rows; `summary` stays whole-zone. `filter` applies within `bucket`, so
-`bucket: "directlyTargeted"` with `liveOnlyOnConditionalAds` returns just the
-groups `directlyTargetedLiveOnConditionalAds` counts, and `bucket: "freeRadicals"`
-just those `freeRadicalHostsLiveOnConditionalAds` counts.
-
-Each row's `offers.ads[]` has one entry per ad, with no cap and no ad skipped:
-`{ adId, verdict, live, off?, conditions?, reasons?, paramBlocks?, contradiction?,
-contradictionOverridable? }`, empty fields left out. `verdict` is the pair's, the
-one the counts use. `conditions`, `reasons` and `paramBlocks` are the ad's own, so
-an excluded ad with none of them is out because its group is. `live` is the whole
-chain whatever the verdict, so read `verdict` and `live` together before naming an
-ad as the one that serves: `conditional` and `live: true` render only on the visits
-its `conditions` name. A campaign or creative hidden from the user reads as off
-here; `explain_serve` on that ad says the lookup failed instead.
-
-A row too large for one response comes back as a stub, `{ id, name, verdict,
-omitted }`, with `complete: false`. It carries no `offers`, so it says nothing
-about the group's ads: `explain_serve` gives that group's detail, and `next_offset`
-pages on past it.
-
-The count can also include a group whose conditional ads together cover
-every visit (one mobile-only, one never-mobile), so do not report its groups as
-serving only some visits without reading their ads.
+To list those groups (`filter`), or to read a row's `offers.ads[]` or a stub row
+(`complete: false`), see [fields.md](fields.md).
 
 Eligible is not serving either: step 4's runtime filters still apply.
 
@@ -260,11 +192,10 @@ Eligible is not serving either: step 4's runtime filters still apply.
 The debug pool runs to 1000, and its size moves with targeting. On a segments-on
 zone it is capped instead by the `adFeedCount` of whichever candidate is picked —
 the segment's own, or the zone's own when the zone itself is picked — and 1000
-when it has none. On a segments zone, check the segments' and the zone's
-`adFeedCount` before reading an absence — the offer may just have been cut.
-Otherwise a round number is not a cap. Test by varying geo and comparing
-membership, not length. The live call is bounded by the zone's (or segment's)
-`adFeedCount`, except on a tiering-enabled template.
+when it has none; check those before reading an absence, the offer may just have
+been cut. A tiering-enabled template returns every ad regardless. Otherwise a
+round number is not a cap: test by varying geo and comparing membership, not
+length.
 
 ## Rule 6 — the debug array is not a clean ranking
 

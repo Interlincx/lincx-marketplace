@@ -1,11 +1,11 @@
 ---
 name: lincx-report-builder
-description: Use when a Lincx question needs dimensions no report has, or the user asks to create or extend a report (dimension set). Loaded by the lincx-reports router.
+description: Use when a Lincx question needs dimensions no report has, or the user asks to create or extend a report (dimension set).
 ---
 
 # Lincx — Report builder
 
-A report is a dimension set. `create_dimension_set` makes a new one; `add_dimensions_to_set` changes one other people already use. The default is to **create**, and no write happens until you have reviewed every set on the network. The rules for picking are in `references/decision-table.md`.
+A report is a dimension set. `create_dimension_set` makes a new one; `add_dimensions_to_set` changes one other people already use. The default is to **create**, and no write happens until you have reviewed every set on the network. The rules for picking are in `references/decision-table.md`. The rules every report follows (date range, auth, network) are in `_shared/ground-rules.md`: read it first.
 
 ## Checklist — a hard gate, in order
 
@@ -27,7 +27,7 @@ Do not call a write tool until step 3's review is written down in the conversati
    - that last write wins if someone edits the same report at the same time.
 6. **Get explicit confirmation**, for a create as well as an add: propose the report name and dimensions (a create) or send the pre-flight (an add), then stop and wait. Write only when the user's most recent message confirms it; a yes from earlier in the conversation doesn't count. No silent writes, and never bundle the write with the query.
 7. **`allowNewDimensions` stays unset** unless the name is missing from every set on the network, is not a core event column (`geoRegion`, `device`, `rank` and the like), **and** the user confirms the spelling. Upstream registers it permanently.
-8. **After the write**, one line with the `id`, `name` and returned `dimensions`. Then run `report_query` against that id, per `_shared/mcp-call-patterns.md`.
+8. **The write itself**: parameters, refusals and timeouts are in `references/write-tools.md`; read it before the call. After the write, one line with the `id`, `name` and returned `dimensions`. Then run `report_query` against that id, per `_shared/mcp-call-patterns.md`.
 9. **On a timeout**, create is not idempotent: re-list with `list_dimension_sets` and look for the name or dimensions before retrying.
 
 ## Naming a new report
@@ -42,4 +42,4 @@ The name describes all of the report's non-automatic dimensions, within 50 chara
 - Offer to remove dimensions or rename a report. The tools cannot.
 - Write without explicit confirmation in the user's most recent message.
 - Pass `allowNewDimensions` to get past a refusal without the user confirming the spelling.
-- Pick a network for the user (see the `lincx-reports` router).
+- Pick a network for the user (`_shared/ground-rules.md`).

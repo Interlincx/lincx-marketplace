@@ -1,6 +1,6 @@
 ---
 name: ad-editor
-description: Use when the user asks to create a Lincx ad (place a creative in an ad group), or to rename an ad, switch it on or off, swap its creative, or set or remove its cpc or cpa. Gates create_ad and update_ad behind reads and confirmation.
+description: Use when the user asks to create a Lincx ad (place a creative in an ad group), or to rename an ad, switch it on or off, swap its creative, or set or remove its cpc or cpa.
 ---
 
 # Lincx — Ad editor

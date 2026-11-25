@@ -200,8 +200,7 @@ For a bot (e.g. Grok Bot), give it this instruction once:
 To watch without polling the manifest, the release feed is `https://github.com/Interlincx/lincx-marketplace/releases.atom`.
 
 Limits outside Claude Code:
-- Slash commands (`/zone-targeted`, `/zone-serving-check`) and hooks aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
-- `lincx-reports` is a router over three sibling skills, so install all four together.
+- Hooks and the template editor's slash commands aren't bundled. Ask for the task in plain words and the skill description triggers the skill.
 - The template editor (`editing-lincx-templates`) is not built until its MCP tools ship, see below.
 
 ---

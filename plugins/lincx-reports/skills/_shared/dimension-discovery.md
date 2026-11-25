@@ -1,6 +1,6 @@
 # Dimension check — before every `report_query`
 
-A dimension set (a custom report in Reports Center) decides which dimensions exist for the answer. Reports Center caps how many dimensions one report can carry, so a network usually has many overlapping reports and none of them is complete. Picking one without checking it against the question produces answers that look fine and are wrong — e.g. a `timezone` on a report without `hour` used to shift every date by a day.
+A dimension set (a custom report in Reports Center) decides which dimensions exist for the answer, and no report carries them all. A report that lacks a needed dimension gives answers that look fine and are wrong.
 
 This check is a **gate**. Do not call `report_query` until it passes. When no report passes, the way forward is `lincx-report-builder`, not a partial answer.
 
@@ -16,13 +16,11 @@ Write the list down before looking at any report:
 | Per-hour detail, OR any local-time day (`timezone` other than UTC, "Denver days", "our business day") | `hour` |
 | Device, geo, rank, template, … | that dimension |
 
-Match names to what the report actually lists — dimension names are the report's own strings (`zone`, `advertiser`, `campaign`, `geoRegion`, `device`, `hour`, …) and are **case-sensitive**: copy the spelling from the catalog, never retype it. `adgroup` is not `adGroup` — the server rejects it, and upstream silently drops it and groups by nothing. Never guess a spelling like `campaign_id`; read it from the catalog.
+Dimension names are the report's own strings (`zone`, `advertiser`, `campaign`, `geoRegion`, `device`, `hour`, …) and are **case-sensitive**: copy the spelling from the catalog, never retype or guess it. `adgroup` is not `adGroup`.
 
 ## Step 2 — Load the catalog once, with dimensions
 
-`list_dimension_sets({ network_id, limit: 100, offset: 0, fields: ["dimensions"] })` — one call returns every report with its `dimensions` array (the MCP's equivalent of the Dimensions column in Reports Center). Page with `offset` only if `next_offset` is present. Never call it twice in one turn.
-
-Use the same `network_id` for the catalog and the report — dimension sets belong to one network.
+`list_dimension_sets({ network_id, limit: 100, offset: 0, fields: ["dimensions"] })` returns every report with its `dimensions` array. Page with `offset` while `next_offset` is present. Never call it twice in one turn. Dimension sets belong to one network: use the same `network_id` for the catalog and the report.
 
 If a returned set has no `dimensions` field, `get_dimension_set({ network_id, id })` that one candidate.
 

@@ -1,6 +1,7 @@
 ---
 name: lincx-zone-tiering
 description: Use when the user asks how a Lincx zone's creatives should be tiered, which offers belong in which tier or rank slot, or wants a tier/rank recommendation for a zone over a date range.
+argument-hint: "[zoneId] [dateStart] [dateEnd] [tiering|ranked]"
 ---
 
 # Lincx — Zone tier analysis
@@ -22,7 +23,8 @@ answers the question and write the report on top of it. If none exists, say so a
 stop — never present a report built from a different zone or a different window.
 
 1. **Resolve inputs.** `network_id` (see Network below; every tool here takes it), `zoneId` (6 lowercase alphanumerics), `dateStart`, `dateEnd`
-   (`YYYY-MM-DD`). **If the user did not give a date range, ask. Never default one.** A
+   (`YYYY-MM-DD`). Given as bare tokens, the dates are `dateStart` then `dateEnd`, and
+   a token that is exactly `tiering` or `ranked` picks the analysis type in step 2. **If the user did not give a date range, ask. Never default one.** A
    tier recommendation is only as good as its window, and a window you invented is a
    recommendation the user cannot audit.
 
@@ -34,8 +36,8 @@ stop — never present a report built from a different zone or a different windo
 
    | User is asking | `analysisType` |
    |---|---|
-   | "which creatives are my best/worst", "how should I tier this zone", "tier recommendation" | `offerTiering` |
-   | "which offer should sit at rank 1/2/3", "how should I order the slots", "rank allocation" | `rankedOfferOptimization` |
+   | "which creatives are my best/worst", "how should I tier this zone", "tier recommendation", or the token `tiering` | `offerTiering` |
+   | "which offer should sit at rank 1/2/3", "how should I order the slots", "rank allocation", or the token `ranked` | `rankedOfferOptimization` |
 
    If genuinely ambiguous, ask — do not report on both.
 

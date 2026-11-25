@@ -7,7 +7,7 @@ description: Entry workflow for creating or restyling a Lincx client template. B
 
 Routes client template work. This skill decides **what to start from** (a baseline, or scratch) and keeps changes minimal. The `editing-lincx-templates` skill decides **how to author**. Both apply.
 
-Registry of baselines: `baselines.md` (offer-wall and listicle are bundled under `references/baselines/`; carousel is not), with a token mapping per baseline in `adapters/`. The baselines ship with this skill: starting from one makes no request to any Lincx network (only saving as a template reads the client's own CAG). Full from-scratch path: `full-build.md`.
+Registry of baselines: `baselines.md` (offer-wall and listicle are bundled under `references/baselines/`; carousel is not), with a token mapping per baseline in `adapters/`. The baselines ship with this skill: starting from one makes no request to any Lincx network (only saving as a template reads the client's own CAG). Full from-scratch path: `full-build.md`. Saving, the checks before "done" and the final report: `save-and-verify.md`.
 
 The restyle itself is done by `${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs`, not by hand: you read the site into a `site-tokens.json`; the script validates it, maps it onto the baseline's tokens, fixes contrast, loads the font and reports every decision. Same site, same baseline, same CSS. This mirrors how lincx-site-fit works.
 
@@ -49,7 +49,12 @@ The restyle itself is done by `${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs`, not b
    - **No URL, or walled:** ask once, in one message, only for what is missing, and record the answers as `confidence: high`, `source: "user"`.
    - Then ask only about groups that are `low` or `missing` and matter for this baseline (the adapter tells you which tokens read them).
    - Also ask, in the same message, only for what is still missing: `htmlPath` and `cssPath`, spacing density, logo constraints. If the result will be created in Lincx as a new template, also `publisherId` and `name` (`create_template` requires both).
-4. **Seed from the baseline.** Copy the bundled files with `node ${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs baseline --type <type> --dir <folder> --html <htmlPath> --css <cssPath>`: `template.html` and `styles.css` land at the chosen `htmlPath` and `cssPath` (in `<folder>` when those are left out), `mock-ads.json` and `cag-schema.json` in `<folder>`. It refuses to overwrite a file that is already there (a resumed session keeps its restyle and overrides); pass `--force yes` only to start over. If the result will be created or saved in Lincx as a template (not just handed back as a file), also ask which network it is on (`get_creative_asset_group` and `restyle.mjs name --client` need it) and the CAG id, read that CAG and run `restyle.mjs cag-check` (see `baselines.md`, "The CAG a new template needs"); stop on `ok: false` before the save step. A restyle handed back as a file needs neither. Create the session entry with `templateId: null`, that CAG id, `cagSchema` from `cag-schema.json`, and `mockAds` from `mock-ads.json` (`.ads`) when no real zone ads are loaded. Set `hostBackground` on the entry to the site's `colorBackground` so the preview paints on the publisher's page. After any `create_template`, write the returned template id into that session entry so the hooks and Flow C keep tracking it.
+4. **Seed from the baseline.** Copy the bundled files with `node ${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs baseline --type <type> --dir <folder> --html <htmlPath> --css <cssPath>`.
+   - `template.html` and `styles.css` land at the chosen `htmlPath` and `cssPath` (in `<folder>` when those are left out), `mock-ads.json` and `cag-schema.json` in `<folder>`.
+   - It refuses to overwrite a file that is already there (a resumed session keeps its restyle and overrides); pass `--force yes` only to start over.
+   - If the result will be created or saved in Lincx as a template (not just handed back as a file), also ask which network it is on (`get_creative_asset_group` and `restyle.mjs name --client` need it) and the CAG id, read that CAG and run `restyle.mjs cag-check` (see `baselines.md`, "The CAG a new template needs"); stop on `ok: false` before the save step. A restyle handed back as a file needs neither.
+   - Create the session entry with `templateId: null`, that CAG id, `cagSchema` from `cag-schema.json`, and `mockAds` from `mock-ads.json` (`.ads`) when no real zone ads are loaded. Set `hostBackground` on the entry to the site's `colorBackground` so the preview paints on the publisher's page.
+   - After any `create_template`, write the returned template id into that session entry so the hooks and Flow C keep tracking it.
 5. **Consult the references.** A restyle-only change counts as trivially simple in the plugin skill: confirm it introduces no new tokens and re-read the anti-patterns 🔴 section. Structure changes need the full read.
 6. **Restyle through the script.**
    `node ${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs restyle --baseline <type> --tokens site-tokens.json --css <cssPath> --out <cssPath> --report restyle-report.md` (the report's first line names the css it restyled; without `--css` that is the pristine bundled one, and the script refuses when `--out` already exists)
@@ -64,32 +69,9 @@ The restyle itself is done by `${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs`, not b
 9. **Tracking.** Adding `clickToCallEvent` or other event code is opt-in: only for elements and event names the user explicitly requests. Required plugin markup is not optional and is never removed. If the baseline already has tracking, keep it. Never copy event IDs or unit IDs to another client without confirming the right ones.
 10. **Flag general gaps.** If a missing thing would help every client (a bug, a missing breakpoint, a missing optional field), finish the client task, then report it as a suggested baseline improvement. Do not silently fork it.
 11. **Preview and verify** with the plugin's preview loop (see Verify).
-12. **Save by name.** The template name is deterministic, so a re-run updates the same template instead of making a duplicate:
-    - `node ${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs name --prefix "<prefix>" --client <network id> --url <site url> --widget <type> --version <baseline version>`
-    - Look it up with `list_templates` (the publisher, in the network), paging until `next_offset` is absent: a match on a later page would turn `create` into a duplicate. Read the match in full with `get_template` `part: 'html'` / `'css'` (see the ground rule), never the truncated response. Write `{ name, html, css, creativeAssetGroupId }` and the matches to files and run `restyle.mjs plan-save --existing <file> --desired <file>`.
-    - `create`: a new template. `patch`: same html and CAG, new css: update it. `none`: nothing changed. `stop`: duplicate names or drift (the html or CAG no longer matches the baseline copy); do not write, tell the user.
-    - A new template sets `tieringEnabled: false`. `create_template` has no `notes` field, so the history line `[Auto - system generated] Created from bundled baseline <type> <version>` goes in the template's notes only when it is pasted in the UI (Flow C); on a direct write put the line in the report.
-    - Then save through Flow C (a local versioned file for now, see #24), or a direct write if the user asked for one. A direct `create_template` / `update_template_content` follows the plan, never a blind create.
+12. **Save by name**, following `save-and-verify.md`: the template name is deterministic, and a write follows the plan it gives (`create` / `patch` / `none` / `stop`), never a blind create.
 13. **Stop** when the restyled copy works.
 
 ## Verify
 
-- `restyle-report.md` has no unexplained `kept` or `skipped` line, and every `contrast-adjusted` line is reported to the user.
-- The scope check passes on the final files: `node ${CLAUDE_PLUGIN_ROOT}/scripts/restyle.mjs check --html <htmlPath> --css <cssPath>` (wrapper class, every selector under it, `@keyframes` and `@font-face` names carrying it). The post-edit hook reports the same findings; for an existing client template, findings inherited from it are not yours to fix unless asked.
-- No hardcoded colours or sizes outside the overrides block; text added in the overrides block is held to 4.5:1 too.
-- The client font actually loads in the preview (a family the script marked "not verified" is assumed to be on Google Fonts; confirm it renders).
-- Preview with the loop's mock ads, on the site's background. Check long text, missing optional fields, zero items, and widths from small mobile to TV (320, 768, 1280, 1920) with no horizontal scroll.
-- Responsive CSS only takes effect on phones if the host page has a viewport meta tag. That is outside the template; mention it if mobile looks unchanged.
-- Required markup from CHECKLIST is present; no 🔴 anti-pattern is triggered.
-- If a live preview or a real-zone test was not possible, say so.
-
-## Final report
-
-Keep it short:
-- Baseline used (type and version), network, and template or artifact result (version if saved, and the plan: create / patch / none)
-- The token list from `restyle-report.md`: mapped, derived, kept (with the reason), contrast-adjusted, unmapped, skipped. Paste it, do not summarise it.
-- Overrides added; any new token
-- Structure or HTML changes (or none)
-- Tracking: none added, preserved, or added as requested
-- Verified and not verified
-- Suggested baseline improvements, if any
+Before saying done, run every check in `save-and-verify.md` and write the final report in its format. If a live preview or a real-zone test was not possible, say so.

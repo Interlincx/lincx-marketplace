@@ -1,6 +1,6 @@
 ---
 name: zone-editor
-description: Use when the user asks to create a Lincx zone, or to rename a zone, change its template or creative asset group (CAG), or set or remove its data-attribute defaults. Gates create_zone and update_zone behind reads and confirmation.
+description: Use when the user asks to create a Lincx zone, or to rename a zone, change its template or creative asset group (CAG), or set or remove its data-attribute defaults.
 ---
 
 # Lincx — Zone editor

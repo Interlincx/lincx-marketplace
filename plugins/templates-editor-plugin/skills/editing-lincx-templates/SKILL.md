@@ -15,24 +15,24 @@ You help users author and adjust Lincx ad creative templates (HTML + CSS) bound 
 
 Never confuse the two. A field that appears in an example under `patterns/example-N/` does NOT mean that field exists on the template you're editing. Every CAG is its own contract.
 
-Before proposing any template HTML or CSS, read the references **in this order**:
+Before proposing any template HTML or CSS, read only what the change needs:
 
-1. `${CLAUDE_PLUGIN_ROOT}/references/README.md` — the read-order overview and the example-picker table.
-2. `${CLAUDE_PLUGIN_ROOT}/references/CHECKLIST.md` — the deterministic production checklist. Every item is a MUST unless marked OPTIONAL. §6 is critical: it explains that fields come from the CAG, not from any universal catalog.
-3. `${CLAUDE_PLUGIN_ROOT}/references/patterns.md` — copy-paste-ready snippets. Jump to the section(s) matching the user's intent (listicle, sticky bar, product card, multi-CTA, rating, video, footer, etc.). Remember: the field names in snippets are illustrative — swap them for the CAG's field names.
-4. `${CLAUDE_PLUGIN_ROOT}/references/anti-patterns.md` — must-not-do list. At minimum, re-read the 🔴 production-breaking section every session. Re-check the matching entry before doing anything that *could* be an anti-pattern.
-5. The relevant `${CLAUDE_PLUGIN_ROOT}/references/patterns/example-N/` directory — real production template + stylesheet + a brief `notes.md`. Use the picker table in `references/README.md` to choose the example that matches the brief. **Copy the structure; don't copy the field names.**
+- **Trivially simple** (change a colour, fix a typo, adjust padding): confirm the change introduces no new tokens, re-read the 🔴 section of `${CLAUDE_PLUGIN_ROOT}/references/anti-patterns.md`, then touch the code. Skip the rest.
+- **Anything else**, in this order, plus the CAG schema, before touching code:
+  1. `${CLAUDE_PLUGIN_ROOT}/references/CHECKLIST.md`, in full — the deterministic production checklist. Every item is a MUST unless marked OPTIONAL. §6 is critical: fields come from the CAG, not from any universal catalog.
+  2. `${CLAUDE_PLUGIN_ROOT}/references/README.md` — its example-picker table. Pick the one example that matches the brief.
+  3. That one `${CLAUDE_PLUGIN_ROOT}/references/patterns/example-N/` directory — a real production template, its stylesheet and a brief `notes.md`. **Copy the structure; don't copy the field names.**
+  4. `${CLAUDE_PLUGIN_ROOT}/references/patterns.md` — only the section(s) matching the user's intent (listicle, sticky bar, product card, multi-CTA, rating, video, footer, etc.). The field names in snippets are illustrative: swap them for the CAG's.
+  5. `${CLAUDE_PLUGIN_ROOT}/references/anti-patterns.md` — the 🔴 production-breaking section, and the matching entry before doing anything that *could* be an anti-pattern.
+
+  Read a second example, or more of `patterns.md`, only when the first pick does not cover the request.
 
 Then:
 
 - If the request is covered by a pattern / example, **follow the pattern's structure exactly**, substituting this template's CAG field names wherever tokens appear.
-- **Only deviate structurally** when the request isn't covered by any pattern, or is trivially simple (change a color, fix a typo, adjust padding).
+- **Only deviate structurally** when the request isn't covered by any pattern, or is trivially simple.
 - When deviating, state in one sentence which pattern/example the work is closest to and why you're not following it exactly.
 - Never invent field names, never use a field the CAG doesn't define, never skip `data-lincx-cta`, never drop legal disclosure blocks.
-
-Depth of consultation:
-- **Trivially simple**: confirm the change doesn't introduce new tokens; re-read `anti-patterns.md` 🔴 section; touch the code. Skip the rest.
-- **Anything else**: full read of the five items above + the CAG schema before touching code.
 
 ## Session state
 

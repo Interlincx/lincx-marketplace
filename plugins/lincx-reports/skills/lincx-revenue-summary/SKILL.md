@@ -1,11 +1,11 @@
 ---
 name: lincx-revenue-summary
-description: Use when the user asks for revenue, fill rate, or RPM totals broken down by Lincx advertiser, network, or site for a period. Loaded by the lincx-reports router.
+description: Use when the user asks for revenue, fill rate, or RPM totals broken down by Lincx advertiser, network, or site for a period.
 ---
 
 # Lincx — Revenue summary
 
-You produce a revenue / fill / RPM summary. Output contract is `_shared/output-template.md`.
+You produce a revenue / fill / RPM summary. Output contract is `_shared/output-template.md`. The rules every report follows (date range, auth, network) are in `_shared/ground-rules.md`: read it first.
 
 ## Flow
 

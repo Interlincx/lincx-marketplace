@@ -21,7 +21,7 @@ Do not create a CAG by default. CAGs are reusable schemas shared by many templat
 
 ## 3. Author
 
-- Consult the plugin references in order before writing (README, CHECKLIST, patterns, anti-patterns, matching example). Follow the closest pattern; state which one and why you deviate, if you do.
+- Consult the plugin references before writing, as the `editing-lincx-templates` consult-references rule says (CHECKLIST, the one matching example, the matching `patterns.md` section, the anti-patterns 🔴 section). Follow the closest pattern; state which one and why you deviate, if you do.
 - Use the CAG's field names, balanced Mustache sections, handled empty states, semantic markup, and alt text.
 - Tracking (`clickToCallEvent` and similar) only when requested. Required plugin markup always stays.
 

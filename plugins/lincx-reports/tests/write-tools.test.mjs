@@ -20,7 +20,7 @@ const mentions = (src) => WRITE_TOOLS.filter((t) => src.includes(`\`${t}`));
 const writers = [...walk(skillsRoot)].map((file) => ({ file, src: readFileSync(file, 'utf8') })).filter(({ src }) => mentions(src).length);
 
 test('the write tools are referenced somewhere', () => {
-  assert.ok(writers.length >= 2, `expected the builder skill and mcp-call-patterns, got ${writers.length}`);
+  assert.ok(writers.length >= 2, `expected the builder skill and its write-tools reference, got ${writers.length}`);
 });
 
 test('every file naming a write tool states the confirmation rule and the review-every-set step', () => {
@@ -44,8 +44,8 @@ test('the builder checklist loads the catalog and reviews it before any write to
   assert.match(checklist, /allowNewDimensions/);
 });
 
-test('only the builder and the shared call patterns name a write tool', () => {
-  const allowed = ['lincx-report-builder', '_shared'];
+test('only the builder names a write tool', () => {
+  const allowed = ['lincx-report-builder'];
   const strays = writers.map(({ file }) => file).filter((f) => !allowed.some((a) => f.includes(`${a}/`) || f.includes(`${a}\\`)));
   assert.deepEqual(strays, []);
 });

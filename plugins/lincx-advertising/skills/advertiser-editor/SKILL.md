@@ -1,6 +1,6 @@
 ---
 name: advertiser-editor
-description: Use when the user asks to create a Lincx advertiser or rename one, or asks how to set up a new advertiser end to end (advertiser, campaign, creative, ad group, ad). Gates create_advertiser and update_advertiser behind reads and confirmation.
+description: Use when the user asks to create a Lincx advertiser or rename one, or asks how to set up a new advertiser end to end (advertiser, campaign, creative, ad group, ad).
 ---
 
 # Lincx — Advertiser editor

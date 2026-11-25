@@ -1,7 +1,7 @@
 {
   "name": "lincx-advertising",
   "description": "Advertising-side edits over the Lincx MCP: create and update advertisers, campaigns, ad groups, ads and creatives, each behind reads, a current → proposed diff and explicit confirmation.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "Lincx"
   }

@@ -1,6 +1,6 @@
 ---
 name: ad-group-editor
-description: Use when the user asks to create a Lincx ad group, or to rename one, switch it on or off, or add or remove zones in its targeting (whitelist or blacklist). Gates create_ad_group and update_ad_group behind reads and confirmation.
+description: Use when the user asks to create a Lincx ad group, or to rename one, switch it on or off, or add or remove zones in its targeting (whitelist or blacklist).
 ---
 
 # Lincx — Ad group editor
