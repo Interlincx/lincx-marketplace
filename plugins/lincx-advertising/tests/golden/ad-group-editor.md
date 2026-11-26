@@ -46,3 +46,41 @@ grp003 is disabled and targets no zone. **User:** Turn on grp003.
 
 `create_ad_group` returns "could not read the network's zones to check the zone ids".
 **Expected:** say the zones couldn't be checked and nothing was written; offer to retry. Never retry without the zones.
+
+## (t1) Update — states and a schedule
+
+grp001 has no stored `geoState` or time key.
+**User:** On grp001, only serve TX and OK, weekdays 9am–5pm Eastern.
+**Expected:** (if it had stored `geoState: ["CA"]`, "only" means removing CA too, or a `set` of TX, OK.) `get_ad_group`, read `${CLAUDE_PLUGIN_ROOT}/references/targeting-keys.md`, `get_ad_group_zone_reach` summary. Current → proposed: `params.geoState` +TX +OK; `params.dateTimeUS/Eastern` = Mon–Fri 9–16 (40 values), in plain words "only visits from TX or OK, Monday–Friday 9:00–17:00 Eastern", live immediately. After "yes": `update_ad_group({ network_id, id: "grp001", params: { geoState: { add: ["TX", "OK"] }, "dateTimeUS/Eastern": { set: ["mon9", …, "fri16"] } } })`, report `changed`, reach summary before vs after, then `explain_serve` for one zone, reading its `conditions` back as the rule working.
+
+## (t2) Update — block slots 2–4 everywhere
+
+**User:** Keep grp001 out of slots 2 to 4 in every zone.
+**Expected:** proposal `exceptParams.zoneId-position` +`*-2` +`*-3` +`*-4`, never in `params`. After "yes": `update_ad_group({ network_id, id: "grp001", exceptParams: { "zoneId-position": { add: ["*-2", "*-3", "*-4"] } } })`.
+
+## (t3) Update — a client key the network has never seen
+
+**User:** Only serve grp001 when utm_sorce is fb.
+**Expected:** check `get_event_stats_keys`; `utm_sorce` is not there but `utm_source` is. Ask whether they meant `utm_source`. No `allowNewKeys` unless the user says the key is new. If the tool refuses with "is not a Lincx targeting key", report it the same way.
+
+## (t4) Update — lowercase state
+
+The tool returns "targeting problem … two-letter UPPERCASE".
+**Expected:** say nothing was written, propose `TX` instead of `tx`, and confirm again before resending.
+
+## (t5) Update — a client key only a zone default supplies
+
+Zone z00001, which grp001 whitelists, has `dataAttributesDefault: { s1: "abc" }`; no traffic yet, so `get_event_stats_keys` has no `s1`.
+**User:** Only serve grp001 when s1 is abc.
+**Expected:** `get_zone` shows the default, which counts as the key's source. Propose `params.s1` +abc, naming z00001 as the zone that supplies it, and say other zones only match on visits that send `s1=abc`. After "yes": `update_ad_group({ network_id, id: "grp001", params: { s1: { add: ["abc"] } }, allowNewKeys: true })`.
+
+## (t6) Update — blacklisting a client key
+
+**User:** Never serve grp001 when utm_source is partner. `utm_source` is in `get_event_stats_keys`, and no zone sets a default for it.
+**Expected:** propose `exceptParams.utm_source` +partner. After "yes" and the write, `explain_serve` reads CONDITIONAL with an `excludes` condition. Report it as "blocked when the visit sends utm_source=partner; visits without it are not blocked by this rule" (the group's other rules still apply). It is not a delivery failure, and no source needs confirming.
+
+## (t7) Update — a zone default on a zone the group can't reach
+
+grp001 whitelists only z00001, which has no `s1` default. z00002 has `dataAttributesDefault: { s1: "abc" }` but isn't in the group's whitelist.
+**User:** Only serve grp001 when s1 is abc.
+**Expected:** z00002's default proves `s1` exists, not that grp001's traffic carries it, since grp001 can't reach z00002. Ask whether the tag on z00001 sends `s1=abc`. If the user can't confirm, say before asking for confirmation that no matching traffic is verified and grp001 may stop serving. No `allowNewKeys` on z00002's default alone.
